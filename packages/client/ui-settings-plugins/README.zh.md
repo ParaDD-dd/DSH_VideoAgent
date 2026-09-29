@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-打开设置中的「插件」分区并选择**插件配置**标签页，即可编辑本部署所组装的宿主平面插件。卡片依次为 shell 执行器（`bash`）、agent loop（智能体循环）的工具调用并行度（`agent-loop`）、subagent 模型选择（`subagent-model-selection`）以及 DeepSeek 搜索提供方（`web-search-deepseek`）。
+打开设置中的「插件」分区并选择**插件配置**标签页，即可编辑本部署所组装的宿主平面插件。卡片依次为 EvoLink 图片生成（`image-evolink`）、Qwen3-TTS 语音合成（`qwen-tts`）、HyperFrames 项目工具（`hyperframes`）、shell 执行器（`bash`）、agent loop（智能体循环）的工具调用并行度（`agent-loop`）、subagent 模型选择（`subagent-model-selection`）以及 DeepSeek 搜索提供方（`web-search-deepseek`）。
 
 ### 这里会出现什么
 
@@ -38,6 +38,12 @@ kind: "package-reference"
 subagent 卡会同时暂存其权限开关与精确模型复选框。启用时必须至少选择一条适配器路由。保存会在一次 mutation 中提交 `enabled` 与 `allowedModels`，并以草稿开始时的 revision 设栅；Host revision 更新后，草稿会标记为失败，而不会恢复已撤销的路由。关闭时会保留已选路由供以后重新使用。可用模型按提供方分组；当前目录中缺失的已存路由排在末尾，且仍可移除。适配器名称与模型描述仍属于实时目录元数据，不会存储；适配器变化、设置提交和重连后，卡片会刷新这些元数据。
 
 ### secret 角色字段
+
+图片生成卡片保存启用开关后，会立即注册或移除工具。其密钥保留在 `.env` 中，参见 [EvoLink 配置](../../web/tool-image-evolink/README.zh.md#use-this-package)。关闭会停止本地轮询和请求，但不会取消上游任务。
+
+Qwen3-TTS 卡片保存启用开关后，会立即注册或移除 `text_to_speech`。其密钥保留在 `.env` 中，参见 [Qwen3-TTS 配置](../../web/tool-qwen-tts/README.zh.md#use-this-package)。工具调用时可以选择音色，返回的音频链接将在 24 小时后失效。
+
+HyperFrames 卡片保存启用开关后，会立即注册或移除 `video_lint`、`video_snapshot` 和 `video_render`。工具运行本机 HyperFrames CLI，并将生成的 PNG 与 MP4 路径保留在项目文件系统中，参见 [HyperFrames 配置](../../video/tool-hyperframes/README.zh.md#use-this-package)。
 
 密钥控件初始为空、只报告是否已配置，并经由 credentials 领域而非 settings 分节写入；空草稿不写入任何东西，保留已存密钥。
 

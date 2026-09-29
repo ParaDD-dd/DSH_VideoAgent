@@ -46,6 +46,9 @@
 | `@deepseek-ai/dsh-experimental-tool-agent-team` | `interrupt_agent`、`list_agents`、`send_message`、`spawn_teammate`、`team_task_create`、`team_task_get`、`team_task_list`、`team_task_update`、`wait_agent` | `ctx.tools`、`ctx.systemPrompt`、`ctx.agentTeams`、`an exact live Team member Agent` | `tool/call`、`team/member`、`team/message/queued`、`team/message/delivered`、`team/task`、`tool/result` | - | 这 9 个工具限定于隐式 Team Lead 与持久 teammate 作用域。随产品发布的 dsh-base bundle 默认禁用该包；文档中的 Agent Teams profile patch 会启用它，并禁用旧 continuable child 的同名控制工具。 |
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`、`owning Agent session` | `tool/call`、`todo/write`、`tool/result` | - | todo_write 是会话所有的状态；UI 将最新的 todo/write 事件渲染为检查清单。`allowParallelInProgress` 是没有默认值的必填项，因此本目录明确选择 `true`，对应描述允许同时存在多个 `in_progress` 项。选择 `false` 的部署会获得同一工具，但描述会要求只能有 1 个活动任务。 |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`、`ctx.workflowEngine`、`ctx.systemPrompt`、`a calling Agent (exec.agent parents the script children)` | `tool/call`、`tool/result` | - | - |
+| `@deepseek-ai/dsh-tool-image-evolink` | `image_generate` | `ctx.tools`, `EVOLINK_API_KEY` | `tool/call`, `tool/result` | - | 默认关闭。image-evolink 设置区可启用该工具；任务查询默认间隔 5000 毫秒。 |
+| `@deepseek-ai/dsh-tool-qwen-tts` | `text_to_speech` | `ctx.tools`、`DASHSCOPE_API_KEY` | `tool/call`、`tool/result` | - | 默认关闭。qwen-tts 设置区可启用该工具；省略音色时使用配置的默认音色，并返回 24 小时后失效的 Qwen 音频 URL。 |
+| `@deepseek-ai/dsh-tool-hyperframes` | `video_lint`、`video_render`、`video_snapshot` | `ctx.tools`、`ctx.subprocess`、`Node.js、FFmpeg 和执行世界中的受支持浏览器` | `tool/call`、`tool/result`、`成功调用时项目下的 PNG 与 MP4 文件` | - | 默认关闭。hyperframes 设置区会启用三个工具；截图输出为最多九个请求时间点、每行三张的三列网格。 |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`、`web_search` | `ctx.tools`、`ctx.web`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | web_search 和 web_fetch 将提供方选择置于 ctx.web 之后，使模型可见 schema 在更换后端时保持稳定。 |
 
 <a id="deepseek-aidsh-mcp-resources"></a>
@@ -2569,6 +2572,170 @@ todo_write 是会话所有的状态；UI 将最新的 todo/write 事件渲染为
 ```
 
 来源：[`packages/workflow/tool-workflow/src/index.ts`](../packages/workflow/tool-workflow/src/index.ts)
+
+<a id="deepseek-aidsh-tool-image-evolink"></a>
+
+## `@deepseek-ai/dsh-tool-image-evolink`
+
+### `image_generate`
+
+使用 Z-Image Turbo 根据文字提示生成图片。等待生成完成并返回有效期为 24 小时的图片 URL。请在链接过期前保存图片。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Image description, 1–2000 characters."
+    },
+    "size": {
+      "type": "string",
+      "description": "Aspect ratio (1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 1:2, 2:1) or WIDTHxHEIGHT, each 376–1536 pixels. Default: 1:1."
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Optional random seed, 1–2147483647."
+    },
+    "nsfw_check": {
+      "type": "boolean",
+      "description": "Enable additional content moderation. Default: false."
+    }
+  },
+  "required": [
+    "prompt"
+  ]
+}
+```
+
+来源：[`packages/web/tool-image-evolink/src/index.ts`](../packages/web/tool-image-evolink/src/index.ts)
+
+默认关闭。image-evolink 设置区可启用该工具；任务查询默认间隔 5000 毫秒。
+
+<a id="deepseek-aidsh-tool-qwen-tts"></a>
+
+## `@deepseek-ai/dsh-tool-qwen-tts`
+
+### `text_to_speech`
+
+使用 Qwen3-TTS 将文字转换为语音。等待生成完成并返回有效期为 24 小时的可下载音频 URL；默认音色不合适时可以选择 Qwen 音色。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Text to synthesize; Qwen3-TTS-Flash accepts up to 600 characters."
+    },
+    "voice": {
+      "type": "string",
+      "description": "Qwen voice name or custom voice ID. Default: Cherry."
+    },
+    "language": {
+      "type": "string",
+      "description": "Language of the text. Omit for Auto; matching a single-language text improves pronunciation.",
+      "enum": [
+        "Auto",
+        "Chinese",
+        "English",
+        "German",
+        "Italian",
+        "Portuguese",
+        "Spanish",
+        "Japanese",
+        "Korean",
+        "French",
+        "Russian"
+      ]
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+来源：[`packages/web/tool-qwen-tts/src/index.ts`](../packages/web/tool-qwen-tts/src/index.ts)
+
+默认关闭。qwen-tts 设置区可启用该工具；省略音色时使用配置的默认音色，并返回 24 小时后失效的 Qwen 音频 URL。
+
+<a id="deepseek-aidsh-tool-hyperframes"></a>
+
+## `@deepseek-ai/dsh-tool-hyperframes`
+
+### `video_lint`
+
+运行 HyperFrames 项目的静态检查和合约检查。传入包含 HyperFrames 项目的目录。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "project_path": {
+      "type": "string",
+      "description": "Path to the HyperFrames project directory."
+    }
+  },
+  "required": [
+    "project_path"
+  ]
+}
+```
+
+来源：[`packages/video/tool-hyperframes/src/index.ts`](../packages/video/tool-hyperframes/src/index.ts)
+
+### `video_render`
+
+将 HyperFrames 项目渲染为 MP4 文件并返回文件路径。传入项目所在目录。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "project_path": {
+      "type": "string",
+      "description": "Path to the HyperFrames project directory."
+    }
+  },
+  "required": [
+    "project_path"
+  ]
+}
+```
+
+来源：[`packages/video/tool-hyperframes/src/index.ts`](../packages/video/tool-hyperframes/src/index.ts)
+
+### `video_snapshot`
+
+渲染 1–9 个 HyperFrames 时间点，并将 PNG 帧拼成三列联系表。传入项目目录和以秒为单位的时间点。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "project_path": {
+      "type": "string",
+      "description": "Path to the HyperFrames project directory."
+    },
+    "times": {
+      "type": "array",
+      "description": "One to nine non-negative timestamps in seconds.",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "project_path",
+    "times"
+  ]
+}
+```
+
+来源：[`packages/video/tool-hyperframes/src/index.ts`](../packages/video/tool-hyperframes/src/index.ts)
+
+默认关闭。hyperframes 设置区会启用三个工具；截图输出为最多九个请求时间点、每行三张的三列网格。
 
 <a id="deepseek-aidsh-tool-web"></a>
 

@@ -109,7 +109,7 @@ function WidthHandle(props: {
 export function ConversationContent({
   sessionId, session, phase, hero, useSessions, useSessionPendingInteraction,
   useWorkspaces, useInput, useComposerBlock, renderSlot, renderSlotChain,
-  selectWorkspace, t, onHandleStart, onHandleDrag, onHandleCommit, onHandleEnd,
+  selectWorkspace, onSelectWorkspace, t, onHandleStart, onHandleDrag, onHandleCommit, onHandleEnd,
 }: ConversationContentProps) {
   const pendingInteraction = useSessionPendingInteraction(snapshot =>
     sessionId === undefined ? undefined : snapshot.get(sessionId))
@@ -200,7 +200,7 @@ export function ConversationContent({
         onPick: (workspaceId) => {
           setPickerOpen(false)
           setPendingWorkspaceId(workspaceId)
-          void selectWorkspace(workspaceId).catch(() => {
+          void (onSelectWorkspace ?? selectWorkspace)(workspaceId).catch(() => {
             setPendingWorkspaceId(current => current === workspaceId ? undefined : current)
           })
         },

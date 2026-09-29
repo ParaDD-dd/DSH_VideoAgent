@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+const [, , subcommand] = process.argv
+if (subcommand !== 'lint') {
+  process.stderr.write(`unexpected HyperFrames fixture command: ${subcommand ?? '<missing>'}\n`)
+  process.exitCode = 2
+} else {
+  process.stdout.write('{"ok":true,"errors":[]}\n')
+}

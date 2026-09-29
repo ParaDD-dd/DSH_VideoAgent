@@ -310,6 +310,59 @@ describe('root outlet', () => {
 })
 
 describe('child outlets and the renderSlot binding', () => {
+  it('mirrors an existing slot without declaring its children again', () => {
+    const h = makeHost()
+    h.declare('main.conversation', SINGLE_ROOT)
+    h.declare('conversation.embed', SINGLE_ROOT)
+    h.add('main.conversation', { component: () => <b>source content</b> })
+    h.add('conversation.embed', { component: undefined, mirrorOf: 'main.conversation' })
+    const { view } = mountRoot(h, { 'conversation.embed': SINGLE_ROOT }, renderSlot =>
+      renderSlot('conversation.embed', {}))
+    expect(view.container.textContent).toBe('source content')
+  })
+
+  it('passes the target render occurrence owner values to the source entry', () => {
+    const h = makeHost()
+    h.declare('main.conversation', SINGLE_ROOT)
+    h.declare('conversation.embed', SINGLE_ROOT)
+    h.add('main.conversation', { component: ({ label }: { label: string }) => <b>{label}</b> })
+    h.add('conversation.embed', { component: undefined, mirrorOf: 'main.conversation' })
+    const { view } = mountRoot(h, { 'conversation.embed': SINGLE_ROOT }, renderSlot =>
+      renderSlot('conversation.embed', { label: 'Chosen directory' }))
+    expect(view.container.textContent).toBe('Chosen directory')
+  })
+
+  it('keeps the mirror empty until its source is declared', () => {
+    const h = makeHost()
+    h.declare('conversation.embed', SINGLE_ROOT)
+    h.add('conversation.embed', { component: undefined, mirrorOf: 'main.conversation' })
+    const { view } = mountRoot(h, { 'conversation.embed': SINGLE_ROOT }, renderSlot =>
+      renderSlot('conversation.embed', {}))
+    expect(view.container.textContent).toBe('')
+    act(() => {
+      h.declare('main.conversation', SINGLE_ROOT)
+      h.add('main.conversation', { component: () => <b>late source</b> })
+    })
+    expect(view.container.textContent).toBe('late source')
+  })
+
+  it.each([
+    ['kind', { kind: 'list', scope: 'root' }],
+    ['scope', SINGLE_SESSION],
+  ])('rejects a mirror with a different %s', (_difference, targetSpec) => {
+    const h = makeHost()
+    h.addSession('s')
+    h.current.set('s')
+    h.declare('main.conversation', SINGLE_ROOT)
+    h.declare('conversation.embed', targetSpec)
+    h.add('main.conversation', { component: () => <b>source content</b> })
+    h.add('conversation.embed', { component: undefined, mirrorOf: 'main.conversation' })
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(() => mountRoot(h, { 'conversation.embed': targetSpec }, renderSlot =>
+      renderSlot('conversation.embed', {}))).toThrow(/must match the kind and scope/)
+    spy.mockRestore()
+  })
+
   it('renders declared single slots live: fallback when empty, register, dispose back', () => {
     const h = makeHost()
     h.declare('k.single', SINGLE_ROOT)

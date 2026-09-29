@@ -1,0 +1,3 @@
+name: 视频制作模式
+description: 基于 HyperFrames 制作 HTML 动画视频，按写脚本、做视频、渲染导出三阶段推进。
+order: 3

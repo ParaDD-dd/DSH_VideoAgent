@@ -28,6 +28,18 @@
   - tabpanel "插件配置":
     - list:
       - listitem:
+        - 'button "展开设置: 图片生成（EvoLink）"':
+          - text: 图片生成（EvoLink） 使用 Z-Image Turbo 生成图片，默认每 5 秒查询一次结果。
+          - img
+      - listitem:
+        - 'button "展开设置: 语音合成（Qwen3-TTS）"':
+          - text: 语音合成（Qwen3-TTS） 使用 Qwen3-TTS 生成语音，并在每次工具调用时选择音色。
+          - img
+      - listitem:
+        - 'button "展开设置: HyperFrames 工具"':
+          - text: HyperFrames 工具 通过 HyperFrames CLI 检查项目、渲染时间点网格，并导出 MP4 文件。
+          - img
+      - listitem:
         - 'button "展开设置: 终端"':
           - text: 终端 限制 agent 运行的每一条命令。
           - img

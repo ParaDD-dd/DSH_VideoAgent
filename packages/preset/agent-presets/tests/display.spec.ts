@@ -14,6 +14,10 @@ describe('presetDisplayText', () => {
       name: 't:presetStandardName',
       description: 't:presetStandardDescription',
     })
+    expect(presetDisplayText({ id: 'video-production', trust: 'system', name: '视频制作模式' }, t)).toEqual({
+      name: 't:presetVideoProductionName',
+      description: 't:presetVideoProductionDescription',
+    })
   })
 
   it('keeps user-authored metadata untranslated', () => {

@@ -1,0 +1,17 @@
+- insert:
+    - id: image-evolink-fixture
+      name: './image-evolink-fixture.mjs'
+
+- insert:
+    - id: tool-image-evolink
+      name: '@deepseek-ai/dsh-tool-image-evolink'
+      config:
+        enabled: true
+        baseURL: https://image.evolink.test
+        pollIntervalMs: 5000
+
+- id: tool-bash
+  disabled: true
+
+- id: tool-pwsh
+  disabled: true

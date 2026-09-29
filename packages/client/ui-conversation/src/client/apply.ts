@@ -402,6 +402,11 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     },
   }, InputBar)
 
+  slots.inject('conversation.embed', () => slots.register({
+    name: 'conversation.embed',
+    mirrorOf: 'main.conversation',
+  }))
+
   slots.inject('main', function* () {
     yield slots.register({
       name: 'main',

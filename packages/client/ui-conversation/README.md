@@ -46,6 +46,8 @@ Workspace selection uses `uiWorkspace.openWorkspace` to prepare the target and c
 
 The package occupies the root-scoped `main` key `conversation`, whose wrapper declares the optional-Session `main.conversation` shell. It registers strict Session header/body entries, View list, composer chain and bar, input regions, Hero regions, queue dock, draft persistence, and phase calculation. `ctx.uiSession.provide()` materializes the Conversation and input sources from the same Session binding and supplies `inputActions` as a stable standard prop.
 
+Feature panels outside the standard `main.conversation` entry can declare the optional-Session `conversation.embed` slot and render the same shell. The embedded entry mirrors `main.conversation`; only that source entry declares the child slots. An embedding panel can pass `onSelectWorkspace` to keep Workspace selection within its own navigation and Session creation flow; without it, standard DSH navigation applies. Alternate main panels use the same Session binding, Conversation targets, message presentation, and composer while mounting one editor at a time.
+
 View selection is deterministic: a registered persisted selection wins, otherwise registered `chat` wins, otherwise no View renders. It never chooses the first registered View. Shell phase combines Session lifecycle with the active-target set; no target-specific snapshot is read by the shell.
 
 The shell reads the persisted View preference before rendering when a Session first binds or a cached Session becomes current, activates the registered preferred View or Chat fallback, and activates later tab or focus selections before committing them to the store. A blank Session still omits the `conversation.view` slot; no unselected target is activated.

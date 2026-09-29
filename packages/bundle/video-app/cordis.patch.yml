@@ -1,0 +1,32 @@
+# The dsh-video-app layer adds the video-production UI and host media tools.
+# Apply it after dsh-base and dsh-web-app in the `video` profile.
+
+- insert:
+    - id: tool-image-evolink
+      name: '@deepseek-ai/dsh-tool-image-evolink'
+      config:
+        enabled: false
+        apiKeyEnv: EVOLINK_API_KEY
+        pollIntervalMs: 5000
+
+    - id: tool-qwen-tts
+      name: '@deepseek-ai/dsh-tool-qwen-tts'
+      config:
+        enabled: false
+        apiKeyEnv: DASHSCOPE_API_KEY
+        model: qwen3-tts-flash
+        defaultVoice: Cherry
+        registerVoicePreview: true
+
+    - id: tool-hyperframes
+      name: '@deepseek-ai/dsh-tool-hyperframes'
+      config:
+        enabled: false
+        # The cached headless shell is not loadable in the Windows DSH process
+        # environment. Use installed Chrome, with an environment override for
+        # machines that install Chrome elsewhere.
+        browserPath: !!js "(process.platform === 'win32') ? (process.env.HYPERFRAMES_BROWSER_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe') : undefined"
+        timeoutMs: 600000
+
+    - id: ui-video-production
+      name: '@deepseek-ai/dsh-client-ui-video-production'

@@ -10,8 +10,9 @@
  * Loader fixtures resolve from their package manifest.
  */
 
-import { globSync, readFileSync } from 'node:fs'
-import { dirname, relative, resolve } from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { globSync, lstatSync, readFileSync } from 'node:fs'
+import { dirname, isAbsolute, relative, resolve } from 'node:path'
 import { Script } from 'node:vm'
 import ts from 'typescript'
 import { cordisConfigFiles } from './cordis-config-files.ts'
@@ -61,7 +62,7 @@ if (import.meta.main) {
   const files = cordisConfigFiles(root)
 
   for (const file of files) {
-    const document = loadCordisYaml(readFileSync(resolve(root, file), 'utf8'))
+    const document = loadCordisYaml(readConfig(file))
     if (!isUnknownArray(document)) {
       errors.push(`${file}: root must be a Loader entry array`)
       continue
@@ -162,8 +163,27 @@ function validatePresetPlaneSeparation(): string[] {
 
 /** Every entry of one config file, or an empty list when it is not an entry array. */
 function loadEntries(file: string): unknown[] {
-  const document = loadCordisYaml(readFileSync(resolve(root, file), 'utf8'))
+  const document = loadCordisYaml(readConfig(file))
   return isUnknownArray(document) ? document : []
+}
+
+/** Read a tracked config symlink when Windows checked it out as a path stub. */
+function readConfig(file: string): string {
+  const path = resolve(root, file)
+  const content = readFileSync(path, 'utf8')
+  if (process.platform !== 'win32' || lstatSync(path).isSymbolicLink()
+    || !/^\.\.?[\\/].+\.ya?ml\s*$/u.test(content)) return content
+  const index = execFileSync('git', ['ls-files', '-s', '--', file.replaceAll('\\', '/')], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+  if (!index.startsWith('120000 ')) return content
+  const target = resolve(dirname(path), content.trim())
+  const inside = relative(root, target)
+  if (inside === '..' || inside.startsWith('..\\') || isAbsolute(inside)) {
+    throw new Error(`${file}: tracked config symlink points outside the repository`)
+  }
+  return readFileSync(target, 'utf8')
 }
 
 /**

@@ -16,6 +16,8 @@ Slots 是 Web Client 的类型化 React 组合系统。[`dsh-client-ui-slots`](.
 
 注册和声明遵循 Cordis effect 生命周期。销毁一个 entry 会移除其贡献，并递归折叠它声明的 child slots。因此，向其他包的 slot 贡献功能时使用 `ctx.slots.inject(key, callback)`：callback 会在每段声明生命周期内运行，owner 折叠时其 effect 随之移除，owner 再次挂载时则重新运行。
 
+另一个位置可以通过不带组件的 `{ name: target, mirrorOf: source }` 注册来放置现有 single slot。源与目标必须拥有相同的 scope，目标渲染位置会将 owner 值传给源 entry。只有源 entry 声明后代 slot，而目标的 owner 渲染自己声明的 slot。有状态内容同一时间只应挂载在一个位置。
+
 ```tsx ignore-check
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -172,6 +174,8 @@ root
 │     └─ sidebar.right.tab.menu.item
 └─ shell.overlay
 ```
+
+`video` profile 还会注册 `video-production` main entry；它的 `conversation.embed` child 与 `main.conversation` 使用相同的 Conversation 子树。
 
 生成的 Client inspect catalog 是每个 key 的完整参考，包含 cardinality、scope、owner props、标准 props、当前 occupant、声明 owner 与替换风险。运行中的动态包可以用 `cordis_inspect what:"client"` 查询实时树与某个精确 key；源码 catalog 由 `pnpm run gen-client-catalog` 根据 `SlotMap` 声明和 `slots.register()` 调用点生成。
 

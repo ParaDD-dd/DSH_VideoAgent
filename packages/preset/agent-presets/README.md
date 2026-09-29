@@ -27,7 +27,7 @@ Use `dsh-agent-presets` to give each session the tools, prompt sections, and ski
 
 Mount this package in a composition that should give each agent session its own tools, prompt sections, and skills from a preset file. Every session names a preset — explicitly or through the configured default — and is composed from it; without the package, sessions fall back to whatever the host composition mounts.
 
-The shipped Web `standard`, `ptc`, and `cordis` presets include [explicit file delivery](../../client/ui-deliverables/README.md#explicit-deliveries). The `minimal` preset keeps its fixed two-tool training configuration.
+The shipped Web `standard`, `ptc`, and `cordis` presets include [explicit file delivery](../../client/ui-deliverables/README.md#explicit-deliveries). The `minimal` preset keeps its fixed two-tool training configuration. The `video-production` preset gives an Agent a HyperFrames workflow with script JSON, per-shot narration, HTML animation, snapshot review, and explicit MP4 export; on Windows DSH it can create an official-blank-equivalent project locally when the CLI `init` subprocess fails.
 
 ### What a preset gives a session
 
@@ -152,6 +152,7 @@ Read these pages when the package-level contract is not enough; they move from t
 - [Session package map](../../session/README.md) — the durable session record a preset switch appends to.
 - [Generated configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-agent-presets) — every accepted config field and its source declaration.
 - [Per-session agent presets note](../../../.agents/notes/implemented/architecture/2026-08-03-per-session-agent-presets.md) — design rationale and alternatives.
+- [Video production preset note](../../../.agents/notes/implemented/architecture/2026-09-23-video-production-agent-preset.md) — scoped media tools and staged HyperFrames workflow.
 
 -----
 

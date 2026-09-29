@@ -16,6 +16,8 @@ Declaring a child has three effects: it makes the child key live, authorizes tha
 
 Registrations and declarations follow Cordis effect lifetimes. Disposing an entry removes its contribution and recursively collapses the child slots it declared. A feature that contributes into another package's slot therefore uses `ctx.slots.inject(key, callback)`: the callback runs for each declaration lifetime, its effects are removed when the owner collapses, and it runs again if the owner is mounted again.
 
+An alternate single-slot placement may register `{ name: target, mirrorOf: source }` without a component. The source and target must have the same scope, and the target render occurrence passes its owner values to the source entry. The source entry alone owns descendant declarations, while the target's owner renders its own declared slot. Mount stateful content at one location at a time.
+
 ```tsx ignore-check
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -172,6 +174,8 @@ root
 │     └─ sidebar.right.tab.menu.item
 └─ shell.overlay
 ```
+
+The `video` profile also registers a `video-production` main entry whose `conversation.embed` child uses the same Conversation subtree as `main.conversation`.
 
 The generated Client inspect catalog is the exhaustive contract for each key: cardinality, scope, owner props, standard props, current occupants, declaration owner, and replacement risk. A running dynamic package can query the live tree and an exact key with `cordis_inspect what:"client"`; the source catalog is generated from `SlotMap` declarations and `slots.register()` call sites by `pnpm run gen-client-catalog`.
 

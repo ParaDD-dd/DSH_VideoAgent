@@ -39,6 +39,8 @@ register 调用可以用 `store: defineStore(...)` 声明 store 席位：`init` 
 
 声明即认领：注册条目成为唯一被允许渲染该键的条目；注册未声明 slot、声明已声明过的子项、在两个 scope 下挂载同一个共享句柄、或注册缺少 `select` 的 chain，都会在加载时抛出。条目的 disposer 会递归移除其声明的子 slot——账本行、贡献与 store 挂载都随同一生命周期结束而移除。
 
+若需在另一个位置放置现有 single slot 树，可将目标注册为 `mirrorOf: sourceKey`，无需组件。源与目标的 scope 必须相同，且目标的 owner 值必须满足源 slot 的 owner 要求。只有源 entry 声明后代 slot。有状态内容同一时间只应挂载在一个位置。
+
 -----
 
 <a id="understand-the-implementation"></a>

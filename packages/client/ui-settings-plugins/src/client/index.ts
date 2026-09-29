@@ -27,6 +27,12 @@ import { PluginsSettingsSection } from './PluginsSettingsSection.tsx'
 import type { PluginsSettingsSectionInjected, PluginsSettingsTabEntry } from './PluginsSettingsSection.tsx'
 import { SubagentModelSelectionCard } from './SubagentModelSelectionCard.tsx'
 import { WebSearchCard } from './WebSearchCard.tsx'
+import { ImageEvolinkCard } from './ImageEvolinkCard.tsx'
+import { IMAGE_EVOLINK_NS, ImageEvolinkCardController } from './image-evolink-card-controller.ts'
+import { QwenTtsCard } from './QwenTtsCard.tsx'
+import { QWEN_TTS_NS, QwenTtsCardController } from './qwen-tts-card-controller.ts'
+import { HyperframesCard } from './HyperframesCard.tsx'
+import { HYPERFRAMES_NS, HyperframesCardController } from './hyperframes-card-controller.ts'
 import { AGENT_LOOP_NS, AgentLoopCardController } from './agent-loop-card-controller.ts'
 import { SHELL_NS, BashCardController } from './bash-card-controller.ts'
 import { ConfigurablePluginsTabController } from './tab-store.ts'
@@ -48,6 +54,8 @@ export type {
 export type { AgentLoopCardFace, AgentLoopCardState } from './agent-loop-card-controller.ts'
 export type { BashCardFace, BashCardState } from './bash-card-controller.ts'
 export type { WebSearchCardFace, WebSearchCardState } from './web-search-card-controller.ts'
+export type { QwenTtsCardFace, QwenTtsCardState } from './qwen-tts-card-controller.ts'
+export type { HyperframesCardFace, HyperframesCardState } from './hyperframes-card-controller.ts'
 
 /** Dictionary namespace owned by this plugin. */
 const NS = 'settings.plugins'
@@ -66,6 +74,9 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-settings-plugins: section dictionaries')
 
   const bash = new BashCardController(ctx.settingsScope.bind({ namespace: SHELL_NS }))
+  const imageEvolink = new ImageEvolinkCardController(ctx.settingsScope.bind({ namespace: IMAGE_EVOLINK_NS }))
+  const qwenTts = new QwenTtsCardController(ctx.settingsScope.bind({ namespace: QWEN_TTS_NS }))
+  const hyperframes = new HyperframesCardController(ctx.settingsScope.bind({ namespace: HYPERFRAMES_NS }))
   const agentLoop = new AgentLoopCardController(ctx.settingsScope.bind({ namespace: AGENT_LOOP_NS }))
   const webSearch = new WebSearchCardController(
     ctx.settingsScope.bind({ namespace: WEB_SEARCH_NS }), ctx)
@@ -165,6 +176,24 @@ export function apply(ctx: ClientContext): void {
   }, ConfigurablePluginsTab))
 
   ctx.slots.inject('settings.plugin.item', function* () {
+    yield ctx.slots.register({
+      name: 'settings.plugin.item',
+      key: IMAGE_EVOLINK_NS,
+      locale: NS,
+      inject: () => imageEvolink.inject(),
+    }, ImageEvolinkCard)
+    yield ctx.slots.register({
+      name: 'settings.plugin.item',
+      key: QWEN_TTS_NS,
+      locale: NS,
+      inject: () => qwenTts.inject(),
+    }, QwenTtsCard)
+    yield ctx.slots.register({
+      name: 'settings.plugin.item',
+      key: HYPERFRAMES_NS,
+      locale: NS,
+      inject: () => hyperframes.inject(),
+    }, HyperframesCard)
     yield ctx.slots.register({
       name: 'settings.plugin.item',
       key: SHELL_NS,

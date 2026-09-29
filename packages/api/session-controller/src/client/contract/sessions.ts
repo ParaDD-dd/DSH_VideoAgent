@@ -29,13 +29,14 @@ export interface ISessions {
   readonly searchResultLimit: number
   /**
    * Create or adopt a Session on the Host.
-   * @param opts - target workspace, directory, and optional preallocated identity.
+   * @param opts - target workspace or directory, optional preallocated identity, and Agent preset for the new Session.
    * @returns the Session identity after its local binding is addressable.
    */
   create(opts?: {
     workspaceId?: WorkspaceId
     cwd?: string
     sessionId?: SessionId
+    agentPreset?: string
   }): Promise<SessionId>
   /**
    * Select a session as current.

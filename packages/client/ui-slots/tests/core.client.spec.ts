@@ -12,6 +12,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'test.keyed': { kind: 'keyed'; scope: 'session' }
     'test.chain': { kind: 'chain'; scope: 'session'; owner: { tags: string[] } }
     'test.grandchild': { kind: 'single'; scope: 'root' }
+    'test.mirror': { kind: 'single'; scope: 'root' }
   }
 }
 
@@ -36,6 +37,7 @@ function mountFrame(core: SlotCore) {
       'test.list': { kind: 'list', scope: 'root' },
       'test.keyed': { kind: 'keyed', scope: 'session' },
       'test.chain': { kind: 'chain', scope: 'session' },
+      'test.mirror': { kind: 'single', scope: 'root' },
     },
   // Type-level renderSlot presence is proven by the type-chain spec; erasing
   // here keeps runtime fixtures terse.
@@ -45,6 +47,28 @@ function mountFrame(core: SlotCore) {
 const flushMicrotasks = () => new Promise<void>((resolve) => { queueMicrotask(resolve) })
 
 describe('a-priori root and declaration gate', () => {
+  it('registers a second placement of a single slot without claiming its children', () => {
+    const core = new SlotCore()
+    mountFrame(core)
+    const dispose = core.register({ name: 'test.mirror', mirrorOf: 'test.single' })
+    expect(core.entries('test.mirror')[0]?.mirrorOf).toBe('test.single')
+    expect(core.specDynamic('test.single')).toBeDefined()
+    dispose()
+    expect(core.entries('test.mirror')).toHaveLength(0)
+  })
+
+  it('rejects incompatible mirror registrations at load', () => {
+    const core = new SlotCore()
+    mountFrame(core)
+    expect(() => core.register({ name: 'test.mirror', mirrorOf: 'test.mirror' })).toThrow('distinct single-slot source')
+    expect(() => core.register({ name: 'test.mirror', mirrorOf: 'test.session' } as never)).toThrow('must match the kind and scope')
+    expect(() => core.register({ name: 'test.mirror', mirrorOf: 'test.list' } as never)).toThrow('must match the kind and scope')
+    expect(() => core.register({ name: 'test.list', mirrorOf: 'test.single' } as never)).toThrow('distinct single-slot source')
+    expect(() => core.register({ name: 'test.mirror', mirrorOf: 'test.single' } as never, Comp)).toThrow('distinct single-slot source')
+    expect(() => core.register({ name: 'test.mirror', mirrorOf: 'test.single', children: {} } as never)).toThrow('distinct single-slot source')
+    expect(() => core.register({ name: 'test.mirror' } as never)).toThrow('requires a component')
+  })
+
   it('seeds root as single/root at construction', () => {
     const core = new SlotCore()
     expect(core.specDynamic('root')).toEqual({ kind: 'single', scope: 'root' })
@@ -370,7 +394,7 @@ describe('subscription API', () => {
     const off = core.onMutate(key => keys.push(key))
     mountFrame(core)
     // Contribution first, then each declared child key.
-    expect(keys).toEqual(['root', 'test.single', 'test.session', 'test.list', 'test.keyed', 'test.chain'])
+    expect(keys).toEqual(['root', 'test.single', 'test.session', 'test.list', 'test.keyed', 'test.chain', 'test.mirror'])
     keys.length = 0
     core.register({ name: 'test.list', id: 'a' }, Comp)
     expect(keys).toEqual(['test.list'])

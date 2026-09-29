@@ -595,6 +595,8 @@ type BaseOptions<
  */
 export interface StoredEntry {
   component: unknown
+  /** Source slot rendered with this occurrence's owner values, without a second child declaration. */
+  mirrorOf?: string | undefined
   options: { key?: string; id?: string; order?: number; label?: SlotLabel; priority?: number }
   /** Chain routing selector (type-erased like `inject`; present exactly on chain-slot entries). */
   select?: ((owner: never) => unknown) | undefined
@@ -629,6 +631,7 @@ export function resolveSlotLabel(label: SlotLabel | undefined): string | undefin
  */
 interface ErasedOptions {
   name: string
+  mirrorOf?: string | undefined
   key?: string | undefined
   id?: string | undefined
   order?: number | undefined
@@ -746,9 +749,9 @@ export class SlotCore {
    * Contribute a component to a declared slot and (optionally) declare child
    * slots, a store seat, and the registrant's business face.
    *
-   * Load-time validation (misconfiguration fails loud; the render hot path
-   * re-checks nothing): registering into an undeclared slot throws; declaring
-   * an already-declared child key throws (one declarer per slot — the message
+   * Load-time validation (misconfiguration fails loud): registering into an
+   * undeclared slot throws; declaring an already-declared child key throws
+   * (one declarer per slot — the message
    * names the first declarer); mounting one shared store handle under slots
    * of different scopes throws. Kind constraints: keyed — missing `key`
    * throws; list — missing `id` throws; chain — missing `select` throws (the
@@ -770,13 +773,31 @@ export class SlotCore {
    * declaration table, `store` seat, `inject` business-face factory, kind
    * shape fields (keyed `key`; list `id`/`order`/`label`).
    * @param component - component honoring the four-share composed props
-   * contract ({@link ComposedProps}); checked at this call site.
+   * contract ({@link ComposedProps}); omitted for a mirror registration.
    * @returns disposer removing the registration and its declarations
    * (idempotent; stale disposers after a cascade are no-ops).
    */
-  /* jscpd:ignore-start -- the two register overloads are deliberately
+  /**
+   * Register a second placement of an existing single slot without claiming its children.
+   * @param options - target slot and source slot with matching kind and scope.
+   * @returns disposer removing the placement.
+   */
+  register<K extends keyof SlotMap & string, Source extends keyof SlotMap & string>(
+    options: { name: K; mirrorOf: Source; priority?: number }
+      & (SlotMap[K]['kind'] extends 'single' ? object : never)
+      & (SlotMap[Source]['kind'] extends 'single' ? object : never)
+      & (SlotMap[K]['scope'] extends SlotMap[Source]['scope'] ? object : never)
+      & (OwnerOf<K> extends OwnerOf<Source> ? object : never),
+  ): () => void
+  /* jscpd:ignore-start -- the two component register overloads are deliberately
    * parallel declarations differing only in the inject share; folding them
    * would lose the per-overload inference of I. */
+  /**
+   * Register a component without an injected business face.
+   * @param options - declared slot and entry options.
+   * @param component - component receiving the composed slot props.
+   * @returns disposer removing the registration and its declarations.
+   */
   register<
     K extends keyof SlotMap & string,
     const EntryKey extends EntryKeyOf<K> = EntryKeyOf<K>,
@@ -823,12 +844,31 @@ export class SlotCore {
       & RendersCheck<C, D>,
   ): () => void
   /* jscpd:ignore-end */
-  register(options: ErasedOptions, component: unknown): () => void {
+  /**
+   * Apply a typed slot registration after overload selection.
+   * @param options - declared slot and registration options.
+   * @param component - component for a non-mirror registration.
+   * @returns disposer for the registration and its child declarations.
+   */
+  register(options: ErasedOptions, component?: unknown): () => void {
     const rec = this.records.get(options.name)
     if (!rec?.spec) {
       throw new Error(`slot "${options.name}" is not declared (a parent entry's children table must declare it)`)
     }
     const spec = rec.spec
+    if (options.mirrorOf !== undefined) {
+      if (spec.kind !== 'single' || options.mirrorOf === options.name
+        || component !== undefined || options.children !== undefined
+        || options.store !== undefined || options.inject !== undefined || options.locale !== undefined) {
+        throw new Error(`slot mirror "${options.name}" requires a distinct single-slot source and no component or entry shares`)
+      }
+      const source = this.records.get(options.mirrorOf)?.spec
+      if (source !== undefined && (source.kind !== spec.kind || source.scope !== spec.scope)) {
+        throw new Error(`slot mirror "${options.name}" must match the kind and scope of "${options.mirrorOf}"`)
+      }
+    } else if (component === undefined) {
+      throw new Error(`slot "${options.name}" requires a component`)
+    }
     // Kind constraints stay runtime checks for dynamically-composed callers;
     // typed callers already satisfied KindOptions statically. Cell occupancy
     // clashes only at the exact priority: a different priority shadows.
@@ -883,6 +923,7 @@ export class SlotCore {
 
     const entry: StoredEntry = {
       component,
+      ...(options.mirrorOf !== undefined ? { mirrorOf: options.mirrorOf } : {}),
       options: {
         ...(options.key !== undefined ? { key: options.key } : {}),
         ...(options.id !== undefined ? { id: options.id } : {}),

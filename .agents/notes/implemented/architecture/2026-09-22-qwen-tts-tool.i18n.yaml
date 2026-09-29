@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-22-qwen-tts-tool.md
+2026-09-22-qwen-tts-tool.md: bee8d9941ad068fcf8a9bff870895bfba06a581e
+2026-09-22-qwen-tts-tool.zh.md: 6eb7ab57715667056ff16ea803a8fe2ebb16f300

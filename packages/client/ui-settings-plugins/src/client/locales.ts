@@ -2,6 +2,9 @@
 
 /** Locale keys these surfaces render. */
 export type PluginsSettingsLocaleKey =
+  | 'imageEvolinkTitle' | 'imageEvolinkDescription' | 'imageEvolinkEnabled' | 'imageEvolinkKeyHint'
+  | 'qwenTtsTitle' | 'qwenTtsDescription' | 'qwenTtsEnabled' | 'qwenTtsKeyHint'
+  | 'hyperframesTitle' | 'hyperframesDescription' | 'hyperframesEnabled' | 'hyperframesKeyHint'
   | 'nav' | 'title' | 'intro' | 'tabs' | 'configurableTab' | 'empty'
   | 'overridden' | 'reset' | 'readOnly' | 'expand' | 'collapse'
   | 'save' | 'saving' | 'discard' | 'unsaved' | 'saveFailed' | 'invalidNumber'
@@ -20,6 +23,18 @@ export type PluginsSettingsLocaleKey =
 
 /** English copy. */
 export const en: Record<PluginsSettingsLocaleKey, string> = {
+  imageEvolinkTitle: 'Image generation (EvoLink)',
+  imageEvolinkDescription: 'Generate images with Z-Image Turbo; checks results every 5 seconds by default.',
+  imageEvolinkEnabled: 'Enable image generation',
+  imageEvolinkKeyHint: 'Set EVOLINK_API_KEY in .env and restart the app. Save this switch to apply it immediately. Turning it off stops waiting for active tasks; submitted tasks may continue at EvoLink.',
+  qwenTtsTitle: 'Speech synthesis (Qwen3-TTS)',
+  qwenTtsDescription: 'Generate speech with Qwen3-TTS and choose a voice per tool call.',
+  qwenTtsEnabled: 'Enable speech synthesis',
+  qwenTtsKeyHint: 'Set DASHSCOPE_API_KEY in .env and restart the app. Save this switch to apply it immediately. Audio URLs expire after 24 hours.',
+  hyperframesTitle: 'HyperFrames tools',
+  hyperframesDescription: 'Lint HyperFrames projects, render timestamp grids, and export MP4 files with the HyperFrames CLI.',
+  hyperframesEnabled: 'Enable HyperFrames tools',
+  hyperframesKeyHint: 'Install the HyperFrames CLI prerequisites, including Node.js, FFmpeg, and a supported browser. The tools run locally from the selected project path; saving this switch applies it immediately.',
   nav: 'Plugins',
   title: 'Plugins',
   intro: 'Configure and inspect the plugins installed in this deployment.',
@@ -76,6 +91,18 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
 
 /** Simplified Chinese copy. */
 export const zh: Record<PluginsSettingsLocaleKey, string> = {
+  imageEvolinkTitle: '图片生成（EvoLink）',
+  imageEvolinkDescription: '使用 Z-Image Turbo 生成图片，默认每 5 秒查询一次结果。',
+  imageEvolinkEnabled: '启用图片生成',
+  imageEvolinkKeyHint: '在 .env 中配置 EVOLINK_API_KEY 后重启应用。保存开关后立即生效。关闭会停止等待正在生成的任务；已提交的任务可能继续在 EvoLink 运行。',
+  qwenTtsTitle: '语音合成（Qwen3-TTS）',
+  qwenTtsDescription: '使用 Qwen3-TTS 生成语音，并在每次工具调用时选择音色。',
+  qwenTtsEnabled: '启用语音合成',
+  qwenTtsKeyHint: '在 .env 中配置 DASHSCOPE_API_KEY 后重启应用。保存开关后立即生效。音频链接将在 24 小时后失效。',
+  hyperframesTitle: 'HyperFrames 工具',
+  hyperframesDescription: '通过 HyperFrames CLI 检查项目、渲染时间点网格，并导出 MP4 文件。',
+  hyperframesEnabled: '启用 HyperFrames 工具',
+  hyperframesKeyHint: '请安装 HyperFrames CLI 所需的 Node.js、FFmpeg 和受支持的浏览器。工具会在本机按项目路径运行；保存开关后立即生效。',
   nav: '插件',
   title: '插件',
   intro: '配置和查看本部署已安装的插件。',

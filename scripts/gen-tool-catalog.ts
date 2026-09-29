@@ -68,6 +68,9 @@ import McpResources from '@deepseek-ai/dsh-mcp-resources'
 import * as ToolSubagent from '@deepseek-ai/dsh-tool-subagent'
 import { registerListSubagentModels } from '../packages/subagent/tool-subagent/src/list-models.ts'
 import * as ToolWeb from '@deepseek-ai/dsh-tool-web'
+import * as ToolImageEvolink from '@deepseek-ai/dsh-tool-image-evolink'
+import * as ToolQwenTts from '@deepseek-ai/dsh-tool-qwen-tts'
+import * as ToolHyperframes from '@deepseek-ai/dsh-tool-hyperframes'
 import WorkflowEngine from '@deepseek-ai/dsh-workflow'
 import type { WorkflowRun, WorkflowStartRequest } from '@deepseek-ai/dsh-workflow'
 import * as ToolRalph from '@deepseek-ai/dsh-tool-ralph'
@@ -620,6 +623,40 @@ const TOOL_PACKAGES: ToolPackage[] = [
       await ctx.plugin(CatalogWorkflowEngine)
       await ctx.plugin(ToolWorkflow)
     },
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-image-evolink',
+    dir: 'tool-image-evolink',
+    source: 'packages/web/tool-image-evolink/src/index.ts',
+    requires: ['ctx.tools', 'EVOLINK_API_KEY'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(ToolImageEvolink, { enabled: true })
+    },
+    note: 'Disabled by default. The image-evolink settings section enables the tool; task queries wait 5000 ms between requests by default.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-qwen-tts',
+    dir: 'tool-qwen-tts',
+    source: 'packages/web/tool-qwen-tts/src/index.ts',
+    requires: ['ctx.tools', 'DASHSCOPE_API_KEY'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      await ctx.plugin(ToolQwenTts, { enabled: true })
+    },
+    note: 'Disabled by default. The qwen-tts settings section enables the tool; calls use the configured default voice when a voice is omitted and return a Qwen audio URL that expires after 24 hours.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-hyperframes',
+    dir: 'tool-hyperframes',
+    source: 'packages/video/tool-hyperframes/src/index.ts',
+    requires: ['ctx.tools', 'ctx.subprocess', 'Node.js, FFmpeg, and a supported browser in the execution world'],
+    writes: ['tool/call', 'tool/result', 'project-local PNG and MP4 files during successful calls'],
+    async mount(ctx) {
+      await ctx.plugin(LocalSubprocessRuntime)
+      await ctx.plugin(ToolHyperframes, { enabled: true })
+    },
+    note: 'Disabled by default. The hyperframes settings section enables all three tools; snapshot output is a three-column grid of up to nine requested timestamps.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-web',

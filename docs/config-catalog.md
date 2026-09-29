@@ -2968,6 +2968,62 @@ export interface Config {
 
 Source: [`packages/goal/tool-goal/src/index.ts:25`](../packages/goal/tool-goal/src/index.ts)
 
+<a id="deepseek-aidsh-tool-hyperframes"></a>
+
+## `@deepseek-ai/dsh-tool-hyperframes`
+
+Requires: `tools` · `subprocess`
+
+```ts config-catalog
+/** Deployment and live settings for the HyperFrames command wrapper. */
+export interface Config {
+  /** Register the three HyperFrames tools when true; defaults to false. */
+  enabled?: boolean
+  /** Register the host settings section; scoped presets set this to false. */
+  registerSettings?: boolean
+  /** Executable name or absolute path used to invoke the package runner. */
+  cliCommand?: string
+  /** Absolute executable path used by HyperFrames to launch its browser. */
+  browserPath?: string
+  /** Maximum duration of one tool call and child process, in milliseconds. */
+  timeoutMs?: number
+  /** Maximum retained stdout and stderr bytes per child process. */
+  maxOutputBytes?: number
+  /** Child-process termination grace period in milliseconds. */
+  graceMs?: number
+  /** Maximum time to wait for the local player server to accept requests. */
+  previewStartupTimeoutMs?: number
+}
+```
+
+Source: [`packages/video/tool-hyperframes/src/index.ts:36`](../packages/video/tool-hyperframes/src/index.ts)
+
+<a id="deepseek-aidsh-tool-image-evolink"></a>
+
+## `@deepseek-ai/dsh-tool-image-evolink`
+
+Requires: `tools`
+
+```ts config-catalog
+/** Deployment and live settings for EvoLink image generation. */
+export interface Config {
+  /** Register image_generate when true; defaults to false. */
+  enabled?: boolean
+  /** Register the host settings section; scoped presets set this to false. */
+  registerSettings?: boolean
+  /** Launch environment variable containing the bearer key. */
+  apiKeyEnv?: string
+  /** API origin, without /v1; defaults to https://api.evolink.ai. */
+  baseURL?: string
+  /** Delay between task queries in milliseconds; defaults to 5000. */
+  pollIntervalMs?: number
+  /** Total creation and polling deadline in milliseconds; defaults to 300000. */
+  timeoutMs?: number
+}
+```
+
+Source: [`packages/web/tool-image-evolink/src/index.ts:22`](../packages/web/tool-image-evolink/src/index.ts)
+
 <a id="deepseek-aidsh-tool-jobs"></a>
 
 ## `@deepseek-ai/dsh-tool-jobs`
@@ -3075,6 +3131,36 @@ export interface Config {
 ```
 
 Source: [`packages/shell/tool-pwsh-persistent/src/index.ts:472`](../packages/shell/tool-pwsh-persistent/src/index.ts)
+
+<a id="deepseek-aidsh-tool-qwen-tts"></a>
+
+## `@deepseek-ai/dsh-tool-qwen-tts`
+
+Requires: `tools`
+
+```ts config-catalog
+/** Deployment and live settings for Qwen text-to-speech. */
+export interface Config {
+  /** Register text_to_speech when true; defaults to false. */
+  enabled?: boolean
+  /** Register the host settings section; scoped presets set this to false. */
+  registerSettings?: boolean
+  /** Register the fixed-sample voice preview route when true; defaults to false and applies live. */
+  registerVoicePreview?: boolean
+  /** Launch environment variable containing the DashScope bearer key. */
+  apiKeyEnv?: string
+  /** DashScope API base, with `/api/v1`; defaults to the Beijing endpoint. */
+  baseURL?: string
+  /** Qwen speech model; defaults to `qwen3-tts-flash`. */
+  model?: string
+  /** Voice used when a tool call omits `voice`; defaults to `Cherry`. */
+  defaultVoice?: string
+  /** Total request deadline in milliseconds; defaults to 120000. */
+  timeoutMs?: number
+}
+```
+
+Source: [`packages/web/tool-qwen-tts/src/index.ts:21`](../packages/web/tool-qwen-tts/src/index.ts)
 
 <a id="deepseek-aidsh-tool-ralph"></a>
 
@@ -3638,6 +3724,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-tool` ([`packages/client/ui-tool/src/index.ts`](../packages/client/ui-tool/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-trajectory` ([`packages/client/ui-trajectory/src/index.ts`](../packages/client/ui-trajectory/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-user-questions` ([`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-video-production` ([`packages/client/ui-video-production/src/index.ts`](../packages/client/ui-video-production/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workflow-run` ([`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workspace` ([`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts))
 - `@deepseek-ai/dsh-command-compact` — requires `commands` · `compaction` ([`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts))
@@ -3678,6 +3765,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-tool-cordis` — requires `tools` · `systemPrompt` · `dynamicCordisRunner` · `cordisInspect` ([`packages/extensions/tool-cordis/src/index.ts`](../packages/extensions/tool-cordis/src/index.ts))
 - `@deepseek-ai/dsh-tool-subagent-control` — requires `tools` · `subagents` ([`packages/subagent/tool-subagent-control/src/index.ts`](../packages/subagent/tool-subagent-control/src/index.ts))
 - `@deepseek-ai/dsh-user-questions` ([`packages/interaction/user-questions/src/index.ts`](../packages/interaction/user-questions/src/index.ts))
+- `@deepseek-ai/dsh-video-app` ([`packages/bundle/video-app/src/index.ts`](../packages/bundle/video-app/src/index.ts))
 - `@deepseek-ai/dsh-webhook` — requires `agents` · `agentDefaultModel` · `agentPresets` · `permissionPresets` · `sessionTitle` · `workspaceRegistry` ([`packages/webhook/webhook/src/index.ts`](../packages/webhook/webhook/src/index.ts))
 - `@deepseek-ai/dsh-workspace` — requires `storageDomain` · `sessionPersistence` ([`packages/workspace/workspace/src/index.ts`](../packages/workspace/workspace/src/index.ts))
 

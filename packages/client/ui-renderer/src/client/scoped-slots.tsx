@@ -719,6 +719,27 @@ function SlotOutlet({ slotKey, ownerProps, opts }: {
   )
 }
 
+/**
+ * Render a second occurrence of one slot without redeclaring its descendants.
+ * @param props - source and alternate slots with matching kind and scope, plus the target occurrence's owner values.
+ * @returns the source entry tree, or an empty outlet while its declaration is absent.
+ * @throws {SlotAssemblyError} When both slot declarations exist with different kinds or scopes.
+ */
+function SlotMirror({ source, target, ownerProps }: {
+  source: string
+  target: string
+  ownerProps: object
+}) {
+  const host = useHost()
+  const sourceSpec = host.specOf(source)
+  const targetSpec = host.specOf(target)
+  if (sourceSpec !== undefined && targetSpec !== undefined
+    && (sourceSpec.kind !== targetSpec.kind || sourceSpec.scope !== targetSpec.scope)) {
+    throw new SlotAssemblyError(`slot mirror '${target}' must match the kind and scope of '${source}'`)
+  }
+  return <SlotOutlet slotKey={source} ownerProps={ownerProps} />
+}
+
 /** Kind dispatch behind the outlet anchor (single/keyed/list/chain, fallbacks, crash faces). */
 function renderOutletContent(
   host: SlotRendererHost,
@@ -753,6 +774,13 @@ function renderOutletContent(
     // change the static crash face.
     const onEntryError = (error: unknown) => {
       host.reportEntryError(slotKey, entry, error, { abdicate: spec.kind !== 'chain' })
+    }
+    if (entry.mirrorOf !== undefined) {
+      return (
+        <SlotErrorBoundary slotKey={slotKey} key={key} onEntryError={onEntryError}>
+          <SlotMirror source={entry.mirrorOf} target={slotKey} ownerProps={owner} />
+        </SlotErrorBoundary>
+      )
     }
     return spec.scope === 'session'
       ? (

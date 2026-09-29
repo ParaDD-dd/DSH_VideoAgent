@@ -69,6 +69,7 @@ interface StoreAxisRecord {
 /** Type-erased options view the implementation works with (the typed overloads proved the shares). */
 interface ErasedRegisterOptions {
   name: string
+  mirrorOf?: string
   children?: Record<string, SlotSpec<SlotEntryDef>>
   store?: StoreDecl
   inject?: (...args: never[]) => Record<string, unknown>
@@ -86,7 +87,7 @@ interface ErasedRegisterOptions {
 }
 
 /** Erased core call face (the service re-erases at its own boundary; the core's typed face targets end callers). */
-interface ErasedCore { register(options: object, component: unknown): () => void }
+interface ErasedCore { register(options: object, component?: unknown): () => void }
 
 /** One synchronous effect installed while an injected slot declaration is live. */
 type SlotInjectionEffect = (() => void) | Iterable<() => void, void, void>
@@ -603,8 +604,8 @@ function copyUnique<T>(
 // inside the class — see its JSDoc for why it must live on the prototype).
 // Element access reaches the private _register legally and keeps it a
 // TS-visible read.
-;(SlotRegistry.prototype as { register: (options: object, component: unknown) => () => void }).register
-  = function register(this: SlotRegistry, rawOptions: object, component: unknown): () => void {
+;(SlotRegistry.prototype as { register: (options: object, component?: unknown) => () => void }).register
+  = function register(this: SlotRegistry, rawOptions: object, component?: unknown): () => void {
     // The core's overloads proved the shares; the implementation works on
     // the erased view (same pattern as the core's own implementation arm).
     const options = rawOptions as ErasedRegisterOptions

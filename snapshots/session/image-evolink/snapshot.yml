@@ -1,0 +1,11 @@
+version: 1
+scenario: image-evolink
+profile: headless
+composition: image-evolink
+recording: authored
+permission: danger-full-access
+environment:
+  EVOLINK_API_KEY: snapshot-image-key
+header:
+  class: image-evolink
+  pin: true

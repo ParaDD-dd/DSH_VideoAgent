@@ -46,6 +46,20 @@ function AppRoot({ renderSlot }: AppRootProps) {
   return <>{renderSlot('main', {}, { entryKey: 'conversation' })}</>
 }
 
+function SwitchableRoot({ renderSlot }: AppRootProps) {
+  const [mode, setMode] = useState<'conversation' | 'video'>('conversation')
+  return (
+    <>
+      <button onClick={() => { setMode(value => value === 'conversation' ? 'video' : 'conversation') }}>Switch mode</button>
+      {renderSlot('main', {}, { entryKey: mode })}
+    </>
+  )
+}
+
+function EmbeddedPanel({ renderSlot }: PropsRenderSlots<'conversation.embed'>) {
+  return <aside>{renderSlot('conversation.embed', {})}</aside>
+}
+
 const LAYOUT_CHILDREN = {
   'main': { kind: 'keyed', scope: 'root' },
 } as const
@@ -59,7 +73,11 @@ function WorkspaceProbe({ open }: EmptyWorkspaceOwnerProps) {
   )
 }
 
-async function bench(opts?: { blank?: boolean }) {
+function WorkspacePickProbe({ onPick }: EmptyWorkspaceOwnerProps) {
+  return <button onClick={() => { onPick('w1' as WorkspaceId) }}>Pick workspace</button>
+}
+
+async function bench(opts?: { blank?: boolean; root?: typeof AppRoot }) {
   const runtime = await SlotTestRuntime.create()
   runtime.ctx.provide('uiWorkspace', {
     openWorkspace: vi.fn(async (_workspaceId: WorkspaceId, beforeOpen: (id: SessionId) => void) => {
@@ -81,12 +99,82 @@ async function bench(opts?: { blank?: boolean }) {
       prompt: vi.fn<ISession['prompt']>(async () => ({ ok: true, value: { accepted: true } })),
     },
   })
-  await runtime.root.declare(LAYOUT_CHILDREN, AppRoot)
+  await runtime.root.declare(LAYOUT_CHILDREN, opts?.root ?? AppRoot)
   await runtime.mount({ inject: [...inject], apply })
   return runtime
 }
 
 describe('resident composer', () => {
+  it('keeps standard Workspace navigation when the Conversation has no panel action', async () => {
+    const runtime = await bench()
+    await runtime.workspaces.update((draft) => {
+      draft.items = [{ workspaceId: 'w1', title: 'Proj', path: '/proj', sessionIds: [SID] }] as never
+    })
+    runtime.slots.register({ name: 'conversation.hero.workspace' }, WorkspacePickProbe)
+    const view = runtime.renderRoot()
+
+    act(() => { runtime.sessions.clear() })
+    fireEvent.click(view.getByRole('button', { name: 'Pick workspace' }))
+    await waitFor(() => { expect(runtime.sessions.list.getSnapshot().current).toBe(SID) })
+    await runtime.dispose()
+  })
+
+  it('lets an embedded panel select a Workspace without standard Conversation navigation', async () => {
+    const runtime = await bench({ root: SwitchableRoot })
+    const videoSession = 'video-session' as SessionId
+    await runtime.sessions.add({
+      id: videoSession,
+      summary: { title: 'Video', displayTitle: 'Video', cwd: '/proj', blank: true },
+      snapshot: { blank: true },
+    })
+    await runtime.workspaces.update((draft) => {
+      draft.items = [{ workspaceId: 'w1', title: 'Proj', path: '/proj', sessionIds: [SID, videoSession] }] as never
+    })
+    const onSelectWorkspace = vi.fn(async (_workspaceId: WorkspaceId) => {
+      runtime.sessions.open(videoSession)
+    })
+    runtime.slots.register({
+      name: 'main',
+      key: 'video',
+      children: { 'conversation.embed': { kind: 'single', scope: 'session-maybe' } },
+    }, ({ renderSlot }: PropsRenderSlots<'conversation.embed'>) =>
+      <aside>{renderSlot('conversation.embed', { onSelectWorkspace })}</aside>)
+    runtime.slots.register({ name: 'conversation.hero.workspace' }, WorkspacePickProbe)
+    const view = runtime.renderRoot()
+
+    act(() => { runtime.sessions.clear() })
+    fireEvent.click(view.getByRole('button', { name: 'Switch mode' }))
+    fireEvent.click(view.getByRole('button', { name: 'Pick workspace' }))
+    await waitFor(() => { expect(onSelectWorkspace).toHaveBeenCalledWith('w1') })
+    expect(runtime.sessions.list.getSnapshot().current).toBe(videoSession)
+    expect(view.container.querySelector('[data-slot="conversation.embed"]')).not.toBeNull()
+    await runtime.dispose()
+  })
+
+  it('renders the same composer after a feature panel selects the embedded Conversation', async () => {
+    const runtime = await bench({ root: SwitchableRoot })
+    const dispose = runtime.slots.register({
+      name: 'main',
+      key: 'video',
+      children: { 'conversation.embed': { kind: 'single', scope: 'session-maybe' } },
+    }, EmbeddedPanel)
+    const view = runtime.renderRoot()
+    expect(view.container.querySelector('[data-composer-input]')).not.toBeNull()
+
+    fireEvent.click(view.getByRole('button', { name: 'Switch mode' }))
+    expect(runtime.slots.entries('conversation.embed')).toHaveLength(1)
+    expect(view.container.querySelector('[data-slot="conversation.embed"] [data-composer-input]')).not.toBeNull()
+    expect(view.container.querySelector('[data-slot="conversation.embed"] [data-slot="conversation.session"]')).not.toBeNull()
+
+    act(() => { runtime.sessions.clear() })
+    expect(view.container.querySelector('[data-slot="conversation.embed"] [data-composer-input]')).not.toBeNull()
+
+    fireEvent.click(view.getByRole('button', { name: 'Switch mode' }))
+    expect(view.container.querySelector('[data-slot="main.conversation"] [data-composer-input]')).not.toBeNull()
+    dispose()
+    await runtime.dispose()
+  })
+
   it('renders the locked view state while no session exists at all', async () => {
     const runtime = await SlotTestRuntime.create()
     runtime.ctx.provide('uiWorkspace', {

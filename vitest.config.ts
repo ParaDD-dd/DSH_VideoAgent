@@ -232,6 +232,11 @@ export default defineConfig({
         'packages/client/ui-workspace/src/client/WorkspaceBrowser.tsx',
         'packages/client/ui-workspace/src/client/WorkspacePicker.tsx',
         'packages/client/ui-workspace/src/client/rows/WorkspaceBrowser.tsx',
+        // The video pane's live file resources and embedded Conversation need
+        // the assembled browser lane for their abort/reconnect matrix; its
+        // project parser and selector model stay under the per-file gate.
+        // TODO(gui): move this pane and its live-resource tests to that lane.
+        'packages/client/ui-video-production/src/client/VideoWorkspace.tsx',
         'packages/client/ui-renderer/src/client/*',
         // Session object internals retain the runtime GUI debt exemption; the
         // assistant-stream reconciler, Controller entry, transport, Agent scope,
@@ -304,6 +309,10 @@ export default defineConfig({
         // The Team browser entry binds its source-covered mount lifecycle to
         // the generated Team Remote contribution, which likewise exists only in lib.
         'packages/experimental/client-ui-agent-team/src/client/index.ts',
+        // This package's browser entry registers slots against the assembled
+        // renderer, and its Host entry is an intentionally empty loader face.
+        'packages/client/ui-video-production/src/client/index.ts',
+        'packages/client/ui-video-production/src/index.ts',
         // Slash/command/input round: per-file gaps deferred with the same
         // client-lane debt. TODO(gui): cover and remove with the lane above.
         'packages/client/ui-commands/src/index.ts',

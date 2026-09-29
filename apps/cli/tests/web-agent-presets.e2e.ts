@@ -233,10 +233,10 @@ describe('the shipped Web composition', () => {
     }
   })
 
-  it('supplies both shipped presets, and only those, from the system root', async () => {
+  it('supplies all shipped presets, and only those, from the system root', async () => {
     const listed = await ctx.agentPresets.list()
 
-    expect(listed.map(preset => preset.id).sort()).toEqual(['cordis', 'minimal', 'ptc', 'standard'])
+    expect(listed.map(preset => preset.id).sort()).toEqual(['cordis', 'minimal', 'ptc', 'standard', 'video-production'])
     expect(listed.every(preset => preset.trust === 'system')).toBe(true)
     expect(ctx.agentPresets.defaultId).toBe('standard')
   })
@@ -259,6 +259,31 @@ describe('the shipped Web composition', () => {
         'workflow', 'write',
       ])
       expect(ctx.commands.find(handle.agent, 'goal')).toBeDefined()
+    } finally {
+      await handle.dispose()
+    }
+  })
+
+  it('composes the HyperFrames tools and workflow prompt from `video-production`', async () => {
+    const handle = await ctx.agents.create({
+      sessionId: SessionId('preset-video-production'),
+      setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'video-production').then(() => undefined),
+    })
+    try {
+      expect(toolNames(ctx, handle.agent)).toEqual(expect.arrayContaining([
+        'ask_user_question', 'image_generate', 'text_to_speech',
+        'video_lint', 'video_snapshot', 'video_render',
+      ]))
+      const prompt = (await ctx.systemPrompt.assemble({ scope: handle.agent })).sections
+        .map(section => section.text).join('\n')
+      expect(prompt).toContain('视频制作 Agent')
+      expect(prompt).toContain('script.json')
+      expect(prompt).toContain('0xC0000409')
+      expect(prompt).toContain('DSH 手工 fallback')
+      expect(prompt).toContain('自动调用 `video_render`')
+      expect(ctx.settings.describe().filter(section => (
+        section.ns === 'image-evolink' || section.ns === 'qwen-tts' || section.ns === 'hyperframes'
+      ))).toHaveLength(3)
     } finally {
       await handle.dispose()
     }
@@ -973,7 +998,7 @@ describe('a composition that configures its own preset roots', () => {
     ])
 
     const listed = await rootsCtx.agentPresets.list()
-    expect(listed.map(preset => preset.id).sort()).toEqual(['cordis', 'minimal', 'ptc', 'standard', 'team-spec'])
+    expect(listed.map(preset => preset.id).sort()).toEqual(['cordis', 'minimal', 'ptc', 'standard', 'team-spec', 'video-production'])
     expect(listed.every(preset => preset.broken === undefined)).toBe(true)
     // The shipped root comes first: a configured directory claiming a shipped
     // id is shadowed, never the other way around.

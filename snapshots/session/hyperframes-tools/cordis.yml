@@ -1,0 +1,12 @@
+- insert:
+    - id: tool-hyperframes
+      name: '@deepseek-ai/dsh-tool-hyperframes'
+      config:
+        enabled: true
+        cliCommand: node
+
+- id: tool-bash
+  disabled: true
+
+- id: tool-pwsh
+  disabled: true

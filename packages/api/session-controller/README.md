@@ -10,6 +10,8 @@ English | [中文](README.zh.md)
 
 `@deepseek-ai/dsh-api-session-controller` owns the Host `ctx.sessionController` service and the generated Client `session`, `skills`, and `fileReferences` Remote namespaces. It serves Session lifecycle and history, the Host-generation model catalog, workspace-path opening, user-invocable skill discovery, and Agent-scoped file references. Use it through API Gateway when a Client needs operations addressed by a Session.
 
+Client `sessions.create()` accepts an optional `agentPreset`. When the Host returns the selected preset, the Client publishes it in the Session projection before the create call resolves, so consumers can classify a new Session without waiting for a later list refresh.
+
 ## Table of Contents
 
 - [Use this package](#use-this-package)

@@ -39,6 +39,8 @@ A register call may declare a store seat with `store: defineStore(...)`: `init` 
 
 Declaring a slot is claiming it: the registering entry becomes the only entry allowed to render that key, and registering into an undeclared slot, declaring an already-declared child, mounting one shared handle under two scopes, or registering a chain without `select` throws at load. An entry's disposer collapses its declared child slots recursively — ledger rows, contributions, and store mounts die on one lifecycle axis.
 
+For alternate placement of an existing single-slot tree, register the target with `mirrorOf: sourceKey` and no component. The source and target must have the same scope, and the target's owner values must satisfy the source slot's owner requirements. Only the source entry declares descendant slots. Mount stateful content at one location at a time.
+
 -----
 
 <a id="understand-the-implementation"></a>

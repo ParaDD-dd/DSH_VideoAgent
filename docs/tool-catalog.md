@@ -42,6 +42,9 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-experimental-tool-agent-team` | `interrupt_agent`, `list_agents`, `send_message`, `spawn_teammate`, `team_task_create`, `team_task_get`, `team_task_list`, `team_task_update`, `wait_agent` | `ctx.tools`, `ctx.systemPrompt`, `ctx.agentTeams`, `an exact live Team member Agent` | `tool/call`, `team/member`, `team/message/queued`, `team/message/delivered`, `team/task`, `tool/result` | - | All nine tools are scoped to implicit Team Leads and durable teammates. The shipped dsh-base bundle keeps the package disabled; the documented Agent Teams profile patch enables it while disabling the legacy continuable-child control names. |
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`, `owning Agent session` | `tool/call`, `todo/write`, `tool/result` | - | todo_write is session-owned state; UIs render the latest todo/write event as a checklist. `allowParallelInProgress` is required with no default, so the catalog states its choice: `true`, whose description invites several `in_progress` items. A deployment choosing `false` receives the same tool with a description asking for exactly one active task. |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`, `ctx.workflowEngine`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents the script children)` | `tool/call`, `tool/result` | - | - |
+| `@deepseek-ai/dsh-tool-image-evolink` | `image_generate` | `ctx.tools`, `EVOLINK_API_KEY` | `tool/call`, `tool/result` | - | Disabled by default. The image-evolink settings section enables the tool; task queries wait 5000 ms between requests by default. |
+| `@deepseek-ai/dsh-tool-qwen-tts` | `text_to_speech` | `ctx.tools`, `DASHSCOPE_API_KEY` | `tool/call`, `tool/result` | - | Disabled by default. The qwen-tts settings section enables the tool; calls use the configured default voice when a voice is omitted and return a Qwen audio URL that expires after 24 hours. |
+| `@deepseek-ai/dsh-tool-hyperframes` | `video_lint`, `video_render`, `video_snapshot` | `ctx.tools`, `ctx.subprocess`, `Node.js, FFmpeg, and a supported browser in the execution world` | `tool/call`, `tool/result`, `project-local PNG and MP4 files during successful calls` | - | Disabled by default. The hyperframes settings section enables all three tools; snapshot output is a three-column grid of up to nine requested timestamps. |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`, `web_search` | `ctx.tools`, `ctx.web`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps. |
 
 <a id="deepseek-aidsh-mcp-resources"></a>
@@ -2561,6 +2564,170 @@ Constraints: concurrency and total-agent caps apply; no filesystem, network, tim
 ```
 
 Source: [`packages/workflow/tool-workflow/src/index.ts`](../packages/workflow/tool-workflow/src/index.ts)
+
+<a id="deepseek-aidsh-tool-image-evolink"></a>
+
+## `@deepseek-ai/dsh-tool-image-evolink`
+
+### `image_generate`
+
+Generate an image from a text prompt using Z-Image Turbo. Waits for generation and returns image URLs valid for 24 hours. Save the images before the links expire.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Image description, 1–2000 characters."
+    },
+    "size": {
+      "type": "string",
+      "description": "Aspect ratio (1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 1:2, 2:1) or WIDTHxHEIGHT, each 376–1536 pixels. Default: 1:1."
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Optional random seed, 1–2147483647."
+    },
+    "nsfw_check": {
+      "type": "boolean",
+      "description": "Enable additional content moderation. Default: false."
+    }
+  },
+  "required": [
+    "prompt"
+  ]
+}
+```
+
+Source: [`packages/web/tool-image-evolink/src/index.ts`](../packages/web/tool-image-evolink/src/index.ts)
+
+Disabled by default. The image-evolink settings section enables the tool; task queries wait 5000 ms between requests by default.
+
+<a id="deepseek-aidsh-tool-qwen-tts"></a>
+
+## `@deepseek-ai/dsh-tool-qwen-tts`
+
+### `text_to_speech`
+
+Convert text to speech with Qwen3-TTS. Returns a downloadable audio URL valid for 24 hours. Choose a Qwen voice when the default voice is not suitable.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Text to synthesize; Qwen3-TTS-Flash accepts up to 600 characters."
+    },
+    "voice": {
+      "type": "string",
+      "description": "Qwen voice name or custom voice ID. Default: Cherry."
+    },
+    "language": {
+      "type": "string",
+      "description": "Language of the text. Omit for Auto; matching a single-language text improves pronunciation.",
+      "enum": [
+        "Auto",
+        "Chinese",
+        "English",
+        "German",
+        "Italian",
+        "Portuguese",
+        "Spanish",
+        "Japanese",
+        "Korean",
+        "French",
+        "Russian"
+      ]
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+Source: [`packages/web/tool-qwen-tts/src/index.ts`](../packages/web/tool-qwen-tts/src/index.ts)
+
+Disabled by default. The qwen-tts settings section enables the tool; calls use the configured default voice when a voice is omitted and return a Qwen audio URL that expires after 24 hours.
+
+<a id="deepseek-aidsh-tool-hyperframes"></a>
+
+## `@deepseek-ai/dsh-tool-hyperframes`
+
+### `video_lint`
+
+Run HyperFrames static project lint and contract checks. Pass the directory containing the HyperFrames project.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "project_path": {
+      "type": "string",
+      "description": "Path to the HyperFrames project directory."
+    }
+  },
+  "required": [
+    "project_path"
+  ]
+}
+```
+
+Source: [`packages/video/tool-hyperframes/src/index.ts`](../packages/video/tool-hyperframes/src/index.ts)
+
+### `video_render`
+
+Render a HyperFrames project to an MP4 file and return its path. Pass the directory containing the project.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "project_path": {
+      "type": "string",
+      "description": "Path to the HyperFrames project directory."
+    }
+  },
+  "required": [
+    "project_path"
+  ]
+}
+```
+
+Source: [`packages/video/tool-hyperframes/src/index.ts`](../packages/video/tool-hyperframes/src/index.ts)
+
+### `video_snapshot`
+
+Render 1-9 HyperFrames timestamps and assemble the PNG frames into a three-column contact sheet. Pass the project directory and timestamps in seconds.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "project_path": {
+      "type": "string",
+      "description": "Path to the HyperFrames project directory."
+    },
+    "times": {
+      "type": "array",
+      "description": "One to nine non-negative timestamps in seconds.",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "project_path",
+    "times"
+  ]
+}
+```
+
+Source: [`packages/video/tool-hyperframes/src/index.ts`](../packages/video/tool-hyperframes/src/index.ts)
+
+Disabled by default. The hyperframes settings section enables all three tools; snapshot output is a three-column grid of up to nine requested timestamps.
 
 <a id="deepseek-aidsh-tool-web"></a>
 

@@ -485,10 +485,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface BeginSubmissionInput {\n    readonly mode: \'queue\' | \'steer\';\n    readonly text: string;\n    readonly attachments: readonly PendingSubmissionAttachment[];\n    readonly onRetire?: (retirement: PendingSubmissionRetirement) => void;\n}',
   },
   {
-    name: 'BoundActions',
-    declaration: 'export type BoundActions<H> = H extends StoreHandle<infer T, infer A> ? BakedActions<T, A> : never;',
-  },
-  {
     name: 'BuiltInLocaleId',
     declaration: 'export type BuiltInLocaleId = typeof LOCALE_IDS[number];',
   },
@@ -591,10 +587,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'InjectFace',
     declaration: 'export type InjectFace<I extends object> = I extends {\n    hooks: infer HS extends HooksSources;\n} ? I extends {\n    keyedHooks: infer KS extends KeyedHooksSources;\n} ? Omit<I, \'hooks\' | \'keyedHooks\'> & PropsHooks<HS> & PropsKeyedHooks<KS> : Omit<I, \'hooks\'> & PropsHooks<HS> : I extends {\n    keyedHooks: infer KS extends KeyedHooksSources;\n} ? Omit<I, \'keyedHooks\'> & PropsKeyedHooks<KS> : I;',
-  },
-  {
-    name: 'InjectParams',
-    declaration: 'export type InjectParams<K extends keyof SlotMap & string, H> = ScopeOf<K> extends \'session\' ? ([\n    H\n] extends [\n    StoreDecl\n] ? [\n    sessionId: SessionIdOf,\n    actions: BoundActions<HandleOf<H>>\n] : [\n    sessionId: SessionIdOf\n]) : ScopeOf<K> extends \'session-maybe\' ? ([\n    H\n] extends [\n    StoreDecl\n] ? [\n    sessionId: SessionIdOf | undefined,\n    actions: BoundActions<HandleOf<H>> | undefined\n] : [\n    sessionId: SessionIdOf | undefined\n]) : ([\n    H\n] extends [\n    StoreDecl\n] ? [\n    actions: BoundActions<HandleOf<H>>\n] : [\n]);',
   },
   {
     name: 'ISession',
@@ -793,10 +785,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type SessionFace = ISession & ObservableSnapshot<SessionSnapshot>;',
   },
   {
-    name: 'SessionIdOf',
-    declaration: 'export type SessionIdOf = SessionStandardProps extends {\n    sessionId: infer S;\n} ? S : string;',
-  },
-  {
     name: 'SessionMaybeStandardProps',
     declaration: 'export interface SessionMaybeStandardProps {\n}',
   },
@@ -826,7 +814,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SlotCore',
-    declaration: 'export class SlotCore {\n    constructor();\n    register<K extends keyof SlotMap & string, const EntryKey extends EntryKeyOf<K> = EntryKeyOf<K>, const D extends ChildrenDecl = Record<never, never>, H extends StoreDecl | undefined = undefined, M = never, N extends (keyof LocaleNamespaceMap & string) | undefined = undefined, C extends SlotComponent<never> = SlotComponent<never>>(options: BaseOptions<K, EntryKey, D, H, M, N> & {\n        inject?: undefined;\n    }, component: C & SlotComponent<ComposedProps<K, NoInfer<EntryKey>, keyof NoInfer<D> & keyof SlotMap & string, HandleOf<NoInfer<H>>, object, NoInfer<M>, NoInfer<N>>> & RendersCheck<C, D>): () => void;\n    register<K extends keyof SlotMap & string, I extends object, const EntryKey extends EntryKeyOf<K> = EntryKeyOf<K>, const D extends ChildrenDecl = Record<never, never>, H extends StoreDecl | undefined = undefined, M = never, N extends (keyof LocaleNamespaceMap & string) | undefined = undefined, C extends SlotComponent<never> = SlotComponent<never>>(options: BaseOptions<K, EntryKey, D, H, M, N> & {\n        inject: (...args: InjectParams<K, H>) => I;\n    }, component: C & SlotComponent<ComposedProps<K, NoInfer<EntryKey>, keyof NoInfer<D> & keyof SlotMap & string, HandleOf<NoInfer<H>>, I, NoInfer<M>, NoInfer<N>>> & RendersCheck<C, D>): () => void;\n    register(options: ErasedOptions, component: unknown): () => void;\n    isLive(entry: StoredEntry): boolean;\n    entries(key: string): readonly StoredEntry[];\n    entriesOfSlot(key /* …truncated — full shape in source */',
+    declaration: 'export class SlotCore {\n    constructor();\n    register<K extends keyof SlotMap & string, Source extends keyof SlotMap & string>(options: {\n        name: K;\n        mirrorOf: Source;\n        priority?: number;\n    } & (SlotMap[K][\'kind\'] extends \'single\' ? object : never) & (SlotMap[Source][\'kind\'] extends \'single\' ? object : never) & (SlotMap[K][\'scope\'] extends SlotMap[Source][\'scope\'] ? object : never) & (OwnerOf<K> extends OwnerOf<Source> ? object : never)): () => void;\n    register<K extends keyof SlotMap & string, const EntryKey extends EntryKeyOf<K> = EntryKeyOf<K>, const D extends ChildrenDecl = Record<never, never>, H extends StoreDecl | undefined = undefined, M = never, N extends (keyof LocaleNamespaceMap & string) | undefined = undefined, C extends SlotComponent<never> = SlotComponent<never>>(options: BaseOptions<K, EntryKey, D, H, M, N> & {\n        inject?: undefined;\n    }, component: C & SlotComponent<ComposedProps<K, NoInfer<EntryKey>, keyof NoInfer<D> & keyof SlotMap & string, HandleOf<NoInfer<H>>, object, NoInfer<M>, NoInfer<N>>> & RendersCheck<C, D>): () => void;\n    register<K extends keyof SlotMap & string, I extends object, const EntryKey extends EntryKeyOf<K> = EntryKeyOf<K>, const D extends ChildrenDecl = Record<never, never>, H extends StoreDecl | undefined = undefined, M = never, N extends (keyof LocaleNamespaceMap & string) | undefined = undefined, C extends SlotComponent<never> = SlotComponent<never>>(options: BaseOptions<K, EntryKey, D, H, M, N> &  /* …truncated — full shape in source */',
   },
   {
     name: 'SlotEntryDef',
@@ -843,10 +831,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SlotKind',
     declaration: 'export type SlotKind = \'single\' | \'list\' | \'keyed\' | \'chain\';',
-  },
-  {
-    name: 'SlotLabel',
-    declaration: 'export type SlotLabel = string | (() => string);',
   },
   {
     name: 'SlotMap',
@@ -867,10 +851,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'StoreDecl',
     declaration: 'export type StoreDecl = StoreHandle<any, any> | StoreFactory;',
-  },
-  {
-    name: 'StoredEntry',
-    declaration: 'export interface StoredEntry {\n    component: unknown;\n    options: {\n        key?: string;\n        id?: string;\n        order?: number;\n        label?: SlotLabel;\n        priority?: number;\n    };\n    select?: ((owner: never) => unknown) | undefined;\n    inject?: ((...args: never[]) => Record<string, unknown>) | undefined;\n    children?: Readonly<Record<string, SlotSpec<SlotEntryDef>>> | undefined;\n    store?: StoreDecl | undefined;\n    locale?: string | undefined;\n    registrant?: string | undefined;\n}',
   },
   {
     name: 'StoreFactory',

@@ -76,12 +76,15 @@ describe('web e2e: plugin configuration section', () => {
     const dialog = await openPlugins()
 
     // Every card the shipped web composition exposes: the shell executor, the
-    // agent loop, subagent selection, and the DeepSeek search provider.
+    // speech, image, and HyperFrames tools, agent loop, subagent selection, and search.
     await dialog.getByText('Subagent', { exact: true }).waitFor({ timeout: 10_000 })
     expect(await dialog.getByRole('button', { name: '展开设置: Subagent' }).count()).toBe(1)
     await dialog.getByText('终端', { exact: true }).waitFor({ timeout: 10_000 })
     expect(await dialog.getByText('Agent 循环', { exact: true }).count()).toBe(1)
     expect(await dialog.getByText('网页搜索', { exact: true }).count()).toBe(1)
+    expect(await dialog.getByText('图片生成（EvoLink）', { exact: true }).count()).toBe(1)
+    expect(await dialog.getByText('语音合成（Qwen3-TTS）', { exact: true }).count()).toBe(1)
+    expect(await dialog.getByText('HyperFrames 工具', { exact: true }).count()).toBe(1)
     // Collapsed: a card's fields appear only once it is expanded.
     expect(await dialog.getByLabel('命令超时（毫秒）').count()).toBe(0)
 
@@ -89,6 +92,54 @@ describe('web e2e: plugin configuration section', () => {
     await compareOrRefreshGolden(SECTION_EXPECTED, snapshot, MODE)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
+
+  it('persists image generation enablement and can turn it off again', async () => {
+    const dialog = await openPlugins()
+    const expand = dialog.getByRole('button', { name: '展开设置: 图片生成（EvoLink）' })
+    const toggle = dialog.getByRole('switch', { name: '启用图片生成' })
+    for (const enabled of [true, false]) {
+      await expand.click()
+      await expect.poll(() => toggle.getAttribute('aria-checked')).toBe(String(!enabled))
+      await toggle.click()
+      await dialog.getByRole('button', { name: '保存', exact: true }).click()
+      await expand.waitFor()
+      await expect.poll(async () => (await settingsDocument()).match(/image-evolink:\s+enabled: (true|false)/)?.[1])
+        .toBe(String(enabled))
+    }
+    expect(tripwire.pageErrors).toEqual([])
+  })
+
+  it('persists speech synthesis enablement and can turn it off again', async () => {
+    const dialog = await openPlugins()
+    const expand = dialog.getByRole('button', { name: '展开设置: 语音合成（Qwen3-TTS）' })
+    const toggle = dialog.getByRole('switch', { name: '启用语音合成' })
+    for (const enabled of [true, false]) {
+      await expand.click()
+      await expect.poll(() => toggle.getAttribute('aria-checked')).toBe(String(!enabled))
+      await toggle.click()
+      await dialog.getByRole('button', { name: '保存', exact: true }).click()
+      await expand.waitFor()
+      await expect.poll(async () => (await settingsDocument()).match(/qwen-tts:\s+enabled: (true|false)/)?.[1])
+        .toBe(String(enabled))
+    }
+    expect(tripwire.pageErrors).toEqual([])
+  })
+
+  it('persists HyperFrames tool enablement and can turn it off again', async () => {
+    const dialog = await openPlugins()
+    const expand = dialog.getByRole('button', { name: '展开设置: HyperFrames 工具' })
+    const toggle = dialog.getByRole('switch', { name: '启用 HyperFrames 工具' })
+    for (const enabled of [true, false]) {
+      await expand.click()
+      await expect.poll(() => toggle.getAttribute('aria-checked')).toBe(String(!enabled))
+      await toggle.click()
+      await dialog.getByRole('button', { name: '保存', exact: true }).click()
+      await expand.waitFor()
+      await expect.poll(async () => (await settingsDocument()).match(/hyperframes:\s+enabled: (true|false)/)?.[1])
+        .toBe(String(enabled))
+    }
+    expect(tripwire.pageErrors).toEqual([])
+  })
 
   it('persists selected adapter routes as the subagent model allowlist', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-subagent-model-selection'))

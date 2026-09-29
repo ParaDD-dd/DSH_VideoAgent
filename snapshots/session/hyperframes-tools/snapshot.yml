@@ -1,0 +1,9 @@
+version: 1
+scenario: hyperframes-tools
+profile: headless
+composition: hyperframes-tools
+recording: authored
+permission: danger-full-access
+header:
+  class: hyperframes-tools
+  pin: true

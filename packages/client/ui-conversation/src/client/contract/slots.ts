@@ -117,7 +117,9 @@ export type UseConversationViews = SnapshotSelectorHook<readonly ViewTab[]>
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
     /** Conversation shell beneath its root-scoped main-panel entry. */
-    'main.conversation': { kind: 'single'; scope: 'session-maybe' }
+    'main.conversation': { kind: 'single'; scope: 'session-maybe'; owner: ConversationNavigationOwnerProps }
+    /** Reusable Conversation shell embedded by another root-scoped surface. */
+    'conversation.embed': { kind: 'single'; scope: 'session-maybe'; owner: ConversationNavigationOwnerProps }
     /** Strict per-Session Conversation body. */
     'conversation.session': { kind: 'single'; scope: 'session' }
     /** Strict per-Session title, actions, and View navigation. */
@@ -266,6 +268,12 @@ export interface ConversationInjected {
   hooks: { composerBlock: ObservableSnapshot<ComposerBlock | undefined> }
 }
 
+/** Optional workspace action supplied by a panel embedding Conversation. */
+export interface ConversationNavigationOwnerProps {
+  /** Open a Workspace Session without invoking standard DSH panel navigation. */
+  readonly onSelectWorkspace?: (workspaceId: WorkspaceId) => Promise<void>
+}
+
 /** Business callbacks injected into the strict Session body. */
 export interface ConversationSessionInjected {
   /** Package-owned View roster source bound only for the Conversation body. */
@@ -376,6 +384,7 @@ export type ConversationSlotProps =
     | 'conversation.hero.agentPreset'
   >
   & InjectFace<ConversationInjected>
+  & ConversationNavigationOwnerProps
   & PropsLocale<'conversation'>
 
 /** Shared target-neutral Conversation store handle. */

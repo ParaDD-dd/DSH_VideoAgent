@@ -22,7 +22,7 @@ kind: "package-group"
 <a id="packages"></a>
 ## 包
 
-六个包分别承担 web 角色；完整词汇与约定以子系统参考文档为准。
+这些包提供 web 检索和远程图片生成；搜索与抓取约定以子系统参考文档为准。
 
 | 包 | 职责 | ctx 键 |
 |---|---|---|
@@ -32,6 +32,8 @@ kind: "package-group"
 | [`web-search-deepseek/`](web-search-deepseek/README.zh.md) | 通过 DeepSeek 原生搜索搜索 web | 注册到 `ctx.web` |
 | [`web-fetch-http/`](web-fetch-http/README.zh.md) | 匿名抓取公共 HTTP(S) 页面 | 注册到 `ctx.web` |
 | [`tool-web/`](tool-web/README.zh.md) | 向模型公开 `web_search` 与 `web_fetch` | 注册到 `ctx.tools` |
+| [`tool-image-evolink/`](tool-image-evolink/README.zh.md) | 通过 EvoLink 生成图片，支持按需启用和任务轮询 | 注册到 `ctx.tools` |
+| [`tool-qwen-tts/`](tool-qwen-tts/README.zh.md) | 通过 Qwen3-TTS 生成语音，支持按需启用和音色选择 | 注册到 `ctx.tools` |
 
 -----
 

@@ -32,7 +32,7 @@
     "@deepseek-ai/dsh-lazy-require": "workspace:^",
     "@deepseek-ai/schemastery": "workspace:^",
     "hyperframes": "^0.8.61",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.4"
   },
   "devDependencies": {
     "@deepseek-ai/cordis-plugin-include": "workspace:^",

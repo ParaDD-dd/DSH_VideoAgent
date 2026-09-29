@@ -141,7 +141,7 @@ describe('video workspace presentation', () => {
     expect(created.createProject).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Choose parent' }))
     await waitFor(() => { expect(created.createProject).toHaveBeenCalledWith('First cut', '/projects') })
-    expect(screen.getByRole('textbox', { name: en['project.name'] }).value).toBe('')
+    expect(screen.getByRole('textbox', { name: en['project.name'] })).toHaveProperty('value', '')
     created.view.unmount()
     cleanup()
 

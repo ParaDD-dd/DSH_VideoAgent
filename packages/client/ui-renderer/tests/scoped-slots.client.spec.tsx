@@ -346,8 +346,9 @@ describe('child outlets and the renderSlot binding', () => {
     expect(view.container.textContent).toBe('late source')
   })
 
+  const listRoot: DeclaredSpec = { kind: 'list', scope: 'root' }
   it.each([
-    ['kind', { kind: 'list', scope: 'root' }],
+    ['kind', listRoot],
     ['scope', SINGLE_SESSION],
   ])('rejects a mirror with a different %s', (_difference, targetSpec) => {
     const h = makeHost()

@@ -31,14 +31,27 @@ The command starts the Web UI at `http://127.0.0.1:3080` by default and opens it
 To run from a repository checkout:
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/ParaDD-dd/DSH_VideoAgent.git
+cd DSH_VideoAgent
 pnpm install
 pnpm run build
 pnpm dsh web
 ```
 
 `pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
+
+### Configure API keys for video production
+
+Open **Settings → Models** in the Web UI, enter your DeepSeek API key in the DeepSeek card, and save it. The key is stored in the local `$DSH_HOME/.credentials.yaml` file; see the [model configuration guide](docs/user/guide/providers.md) for other providers.
+
+For image generation and speech synthesis, create a `.env` file in the directory from which you launch `dsh`:
+
+```dotenv
+EVOLINK_API_KEY=your_evolink_api_key
+DASHSCOPE_API_KEY=your_dashscope_api_key
+```
+
+Start the video workspace with `pnpm dsh --profile video` from a source checkout. Restart it after editing `.env`, then enable **Image generation (EvoLink)** and **Speech synthesis (Qwen3-TTS)** under **Settings → Plugins → Plugin configuration**. These provider keys are read from the launch environment. `.env` and local credential files are ignored by Git; keep your real keys out of committed configuration and README examples. See the [video profile](packages/bundle/video-app/README.md) and the [EvoLink](packages/web/tool-image-evolink/README.md) and [Qwen3-TTS](packages/web/tool-qwen-tts/README.md) package guides for details.
 
 ## Community and support
 

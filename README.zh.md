@@ -35,14 +35,27 @@ npx @deepseek-ai/dsh web
 如需从仓库源码运行：
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/ParaDD-dd/DSH_VideoAgent.git
+cd DSH_VideoAgent
 pnpm install
 pnpm run build
 pnpm dsh web
 ```
 
 `pnpm run build` 会准备仓库产物。`pnpm dsh web` 会直接使用这些已构建产物，不会重新构建。
+
+### 配置视频制作所需的 API Key
+
+在 Web UI 中打开**设置 → 模型**，在 DeepSeek 卡片中填写 API Key 并保存。密钥保存在本地的 `$DSH_HOME/.credentials.yaml` 文件中；其他模型提供方的配置方法见[模型配置指南](docs/user/guide/providers.zh.md)。
+
+图像生成与语音合成需要在启动 `dsh` 的目录中创建 `.env` 文件：
+
+```dotenv
+EVOLINK_API_KEY=your_evolink_api_key
+DASHSCOPE_API_KEY=your_dashscope_api_key
+```
+
+从源码检出目录运行 `pnpm dsh --profile video` 启动视频工作区。修改 `.env` 后重启应用，再到**设置 → 插件 → 插件配置**启用**图像生成（EvoLink）**和**语音合成（Qwen3-TTS）**。这些提供方密钥从启动环境读取。Git 会忽略 `.env` 和本地凭据文件；不要把真实密钥写入提交的配置或 README 示例。详情见[视频 profile](packages/bundle/video-app/README.zh.md)、[EvoLink](packages/web/tool-image-evolink/README.zh.md)和 [Qwen3-TTS](packages/web/tool-qwen-tts/README.zh.md)说明。
 
 ## 社区与支持
 

@@ -32,6 +32,7 @@ const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url))
 /** The shipped Web surface: the dsh-base and dsh-web-app bundle patches over an empty preset root. */
 const BASE_PATCH = join(REPO_ROOT, 'packages/bundle/base/cordis.patch.yml')
 const WEB_PATCH = join(REPO_ROOT, 'packages/bundle/web-app/cordis.patch.yml')
+const VIDEO_PATCH = join(REPO_ROOT, 'packages/bundle/video-app/cordis.patch.yml')
 const CODEX_PACKAGE_DIR = join(REPO_ROOT, 'packages/subagent/subagent-codex')
 const CLAUDE_CODE_PACKAGE_DIR = join(REPO_ROOT, 'packages/subagent/subagent-claude-code')
 /** The installation anchor whose dependency surface the preset module fallback mirrors. */
@@ -266,7 +267,7 @@ describe('the shipped Web composition', () => {
 
   it('composes the HyperFrames tools and workflow prompt from `video-production`', async () => {
     const handle = await ctx.agents.create({
-      sessionId: SessionId('preset-video-production'),
+      sessionId: SessionId(`preset-video-production-${randomUUID()}`),
       setup: agentCtx => ctx.agentPresets.mount(agentCtx, 'video-production').then(() => undefined),
     })
     try {
@@ -281,11 +282,21 @@ describe('the shipped Web composition', () => {
       expect(prompt).toContain('0xC0000409')
       expect(prompt).toContain('DSH 手工 fallback')
       expect(prompt).toContain('自动调用 `video_render`')
-      expect(ctx.settings.describe().filter(section => (
+    } finally {
+      await handle.dispose()
+    }
+  })
+
+  it('registers media settings from the video profile', async () => {
+    const settingsFile = join(await mkdtemp(join(tmpdir(), 'dsh-video-settings-')), 'settings.yaml')
+    await writeFile(settingsFile, '{}\n')
+    const videoCtx = await bootWeb(settingsFile, loadOverlayPatches('dsh-test', VIDEO_PATCH))
+    try {
+      expect(videoCtx.settings.describe().filter(section => (
         section.ns === 'image-evolink' || section.ns === 'qwen-tts' || section.ns === 'hyperframes'
       ))).toHaveLength(3)
     } finally {
-      await handle.dispose()
+      await videoCtx.fiber.dispose()
     }
   })
 

@@ -1,5 +1,10 @@
 CLAUDE.local.md
 .env
+.env.*
+.credentials.yaml
+.credentials.yml
+/settings.yaml
+/cordis.yml
 node_modules/
 lib/
 *.tsbuildinfo

@@ -1,94 +1,62 @@
-# DeepSeek Harness
+# DSH VideoAgent
 
 [English](README.md) | 中文
 
-DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的开源 agent harness（智能体框架）。
+DSH VideoAgent 基于 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 增加以项目为中心的视频创作模式。`video` profile 在 DSH Web UI 中提供专用工作区、视频制作 Agent、媒体工具、预览与时间轴。
 
-它构建于**一切皆插件**的架构之上，由 [Cordis](https://github.com/cordiverse/cordis) 驱动，其设计参见论文 [_A Programming Paradigm for Spatiotemporal Composability_](https://arxiv.org/abs/2608.25512)。
+## 视频创作模式
 
-文档：[https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/)
+- 创建拥有独立工作区和对话历史的视频项目。
+- 与 Agent 编写并审阅 `script.json`，确认脚本后再生成素材。
+- 使用 EvoLink 生成图像、Qwen3-TTS 合成语音，并查看预览和时间轴。
+- 检查 HyperFrames 作品，仅在明确批准后导出视频。
 
-## 开发者预览
-
-DeepSeek Harness 处于 _开发者预览_ 阶段，正在快速迭代。**未来将出现破坏兼容性的变更。**
-
-运行本项目前，请阅读[安全说明](SAFETY.zh.md)。
+[视频 profile](packages/bundle/video-app/README.zh.md) 介绍工作区和工具组合。其他 DSH profile 仍可用于通用 Agent 任务。
 
 <a id="run"></a>
 
 ## 运行
 
-### 通过 `npm` 运行
-
-安装 `Node.js`，然后运行：
-
-```sh
-npx @deepseek-ai/dsh web
-```
-
-该命令默认会在 `http://127.0.0.1:3080` 启动 Web UI，本机启动时还会用默认浏览器打开页面。通过 SSH 启动时只打印宿主机 URL，因为本地转发地址由 SSH 客户端或编辑器持有。传入 `--no-open` 可仅运行服务器而不打开浏览器。详见 [Web UI 指南](docs/user/guide/index.zh.md)。
-
 <a id="run-from-source"></a>
 
 ### 从源码运行
 
-如需从仓库源码运行：
+安装 Node.js 和 pnpm，然后启动本仓库的视频 profile：
 
 ```sh
 git clone https://github.com/ParaDD-dd/DSH_VideoAgent.git
 cd DSH_VideoAgent
 pnpm install
 pnpm run build
-pnpm dsh web
+pnpm dsh --profile video
 ```
 
-`pnpm run build` 会准备仓库产物。`pnpm dsh web` 会直接使用这些已构建产物，不会重新构建。
+本机启动时，Web UI 会在 `http://127.0.0.1:3080` 打开。`pnpm run build` 准备仓库产物，`dsh` 命令直接使用这些产物而不会重新构建。运行项目前请阅读[安全说明](SAFETY.zh.md)。
 
-### 配置视频制作所需的 API Key
+### 配置 API Key
 
 在 Web UI 中打开**设置 → 模型**，在 DeepSeek 卡片中填写 API Key 并保存。密钥保存在本地的 `$DSH_HOME/.credentials.yaml` 文件中；其他模型提供方的配置方法见[模型配置指南](docs/user/guide/providers.zh.md)。
 
-图像生成与语音合成需要在启动 `dsh` 的目录中创建 `.env` 文件：
+如需图像生成和语音合成，在启动 `dsh` 的目录中创建 `.env` 文件：
 
 ```dotenv
 EVOLINK_API_KEY=your_evolink_api_key
 DASHSCOPE_API_KEY=your_dashscope_api_key
 ```
 
-从源码检出目录运行 `pnpm dsh --profile video` 启动视频工作区。修改 `.env` 后重启应用，再到**设置 → 插件 → 插件配置**启用**图像生成（EvoLink）**和**语音合成（Qwen3-TTS）**。这些提供方密钥从启动环境读取。Git 会忽略 `.env` 和本地凭据文件；不要把真实密钥写入提交的配置或 README 示例。详情见[视频 profile](packages/bundle/video-app/README.zh.md)、[EvoLink](packages/web/tool-image-evolink/README.zh.md)和 [Qwen3-TTS](packages/web/tool-qwen-tts/README.zh.md)说明。
+修改 `.env` 后重启应用。视频制作 Agent 会获得自己的图像、语音和 HyperFrames 工具；**设置 → 插件 → 插件配置**中的开关控制宿主工具项。Git 会忽略 `.env` 和本地凭据文件。不要把真实密钥写入提交的配置或 README 示例。提供方详情见 [EvoLink](packages/web/tool-image-evolink/README.zh.md) 与 [Qwen3-TTS](packages/web/tool-qwen-tts/README.zh.md) 说明。
 
-## 社区与支持
+### 标准 DSH Web UI
 
-- 通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交反馈或 bug 报告。
-- 为你的插件仓库添加 [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题，便于被发现。
-- 欢迎加入 DeepSeek Harness 企微群：扫码添加企微小助手并填写入群问卷，完成后小助手会邀请你入群。
+运行 `pnpm dsh web` 可启动不带视频工作区的标准 DSH Web UI。详见 [Web UI 指南](docs/user/guide/index.zh.md)。
 
-<table>
-  <thead>
-    <tr>
-      <th align="center">企微小助手</th>
-      <th align="center">入群问卷</th>
-      <th align="center">微信公众号</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center"><img src="https://cdn.deepseek.com/harness/readme/community-wecom-assistant.png" alt="DeepSeek Harness 企微小助手二维码" width="180" height="180"></td>
-      <td align="center"><a href="https://trtgsjkv6r.feishu.cn/share/base/form/shrcnIt5twSVdLGD52KJBckGCgg"><img src="https://cdn.deepseek.com/harness/readme/community-wecom-survey.png" alt="DeepSeek Harness 入群问卷二维码" width="180" height="180"></a></td>
-      <td align="center"><img src="https://cdn.deepseek.com/harness/readme/community-wechat-official-account.png" alt="DeepSeek Harness 团队微信公众号二维码" width="180" height="180"></td>
-    </tr>
-  </tbody>
-</table>
+## 关于 DeepSeek Harness
 
-## 参与贡献
-
-参见 [CONTRIBUTING.md](CONTRIBUTING.zh.md)。
+DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的开源 Agent 框架。它由 [Cordis](https://github.com/cordiverse/cordis) 驱动，采用一切皆插件的架构。上游项目仍处于开发者预览阶段，可能出现破坏兼容性的变更。详见[上游文档](https://deepseek-harness.github.io/deepseek-harness/)。
 
 ## 开发
 
-请先阅读[开发指南](docs/development.zh.md)与[架构文档](docs/architecture.zh.md)。
-
-面向 agent：请遵循 [AGENTS.md](AGENTS.md)。
+请先阅读[开发指南](docs/development.zh.md)与[架构文档](docs/architecture.zh.md)。面向 Agent：请遵循 [AGENTS.md](AGENTS.md)。
 
 ## 引用
 
